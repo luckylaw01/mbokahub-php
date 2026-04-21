@@ -1,0 +1,161 @@
+# MbokaHub - Comprehensive Project Blueprint & Architecture
+
+## 1. Project Overview
+MbokaHub (formerly Pata Kazi) is a bilingual (English & Swahili) digital marketplace tailored for Kenya. It connects clients (Hirers) with skilled artisans and TVET (Technical and Vocational Education and Training) graduates (Fundis). The application features two main roles in one interface, an AI-powered assistant for job categorization, and a highly polished "social-media-like" feed UI.
+
+## 2. Target Stack Architecture
+This document serves as a complete guide for an AI (like GitHub Copilot) or a developer to reverse-engineer and reconstruct the application from its current React/Vite/Typescript form into a classic LAMP/LEMP stack:
+- **Frontend**: Vanilla HTML5, Vanilla JavaScript (ES6+), CSS3 (Tailwind CSS via CDN or CLI).
+- **Backend**: PHP 8+ (Vanilla object-oriented PHP for REST API or a lightweight MVC structure).
+- **Database**: MySQL 8.x for relational structured data.
+- **AI Integration**: PHP cURL to communicate with the Google Gemini REST API.
+
+## 3. Detailed UI/UX Blueprint (Exact Replica)
+The UI is mobile-first, highly rounded, with heavy glassmorphism, depth elements (shadows/rings), and a professional color scheme.
+
+**Global Styling & Theming:**
+- **Font**: 'Plus Jakarta Sans', sans-serif.
+- **Backgrounds**: Light slate (`bg-slate-50`) or customized off-white (`#f8fafc`).
+- **Primary Accents**: Emerald Green (vibrant greens for trust/verification), Slate Deep Navy (`bg-slate-900` for high contrast text and dark mode buttons).
+- **Shapes**: Extremely rounded corners (`rounded-[3rem]`, `rounded-[2rem]`, `rounded-full`).
+- **Icons**: FontAwesome 6 (e.g., `fas fa-tools`, `fas fa-hammer`, `fas fa-medal`).
+
+**Core Components & Screens:**
+
+### 3.1. Main Header / Navigation Tab
+- Sticky top navigation bar, with a backdrop blur (`bg-white/70 backdrop-blur-xl`).
+- **Left (Branding)**: Logo features a `fas fa-tools` icon inside a vibrant gradient box (`vibrant-gradient text-white p-2.5 rounded-2xl`). Text: "MbokaHub" where "Hub" uses `-webkit-background-clip: text` on a gradient.
+- **Center (Nav Pills)**: Floating flex container (`bg-slate-200/50 p-1.5 rounded-[1.5rem]`). Buttons: Home, Search, Jobs, Profile. The active tab has a white background, ring/shadow, and emerald text, with a scale-up animation.
+- **Right (Lang Toggle)**: Dark button (`bg-slate-900 text-white`) that toggles the global language (EN <-> SW) using `uppercase tracking-widest` formatting.
+
+### 3.2. Role Switcher (Dashboard Mode)
+- Floating pill-shape (`bg-white/50 backdrop-blur-md shadow-2xl rounded-[2.5rem]`) floating near the top of the main container.
+- Two buttons: "I want to Hire" vs "I want Work".
+- **Dynamic View**: Toggling this changes the entire dashboard context. 
+  - Hirer view displays: Search bar, Category grid, TVET spotlights, Top Fundis feed.
+  - Fundi view displays: Dashboard metrics, Active job pipeline, Application statuses.
+
+### 3.3. Main Content Area (Hirer View)
+- **Stories Section**: A horizontal scrollable list of circular avatars (TVET institutions/partners). Colorful gradient borders using `bg-gradient-to-tr`.
+- **Hero/Search Banner**: Massive rounded card (`rounded-[3rem]`) with a blurred background glow (`blur-3xl`). Huge text: "Find Your Expert Fundi" / "Tafuta Fundi Stadi". Contains a sprawling search input (`bg-slate-50 rounded-[2rem] px-16 py-6`).
+- **Categories Grid**: Grid layout of cards (`bg-white p-6 rounded-[2.5rem] border border-slate-100`). Contains a FontAwesome icon in a rounded-2xl square. On active toggle, card transitions seamlessly to a vibrant gradient.
+- **AI Chat Assistant Widget**: A floating chat widget powered by Gemini. Used to help clients describe their problem (e.g., "my pipe is leaking") and outputs a matching category and recommended questions.
+- **Top Fundis Feed / TVET Spotlight**: List of Artisan Cards. The card shows avatar (with an absolute positioned badge for certification), name, category, TVET level (Student, Apprentice, Master), location, star rating, and review count. Buttons for "View Full Portfolio" and "Hire Now".
+
+### 3.4. Modals (Overlays)
+- **Profile Overlay**: Full-screen modal over `bg-slate-900/60 backdrop-blur-2xl`. Top half is an image banner (`h-64 object-cover`) fading to black horizontally. The profile avatar visually bridges the banner and the content below. Contains grid statistics (Base Location, Trust Index) and a massive "Hire Now" button.
+- **Hire Request Modal**: Simple form modal (`rounded-[4rem]`). Fields: Selected Category (Read-only module), Project Details (a large `min-h-[160px] rounded-3xl bg-slate-50` textarea), "Discard", and "Send Job Request" buttons.
+
+## 4. MySQL Database Architecture
+
+To implement this dynamically, use the following normalized relational MySQL 8 schema:
+
+### `users` table
+- `id` (INT PK, Auto Increment)
+- `role` (ENUM: 'hirer', 'fundi', 'admin') DEFAULT 'hirer'
+- `name` (VARCHAR 255, NOT NULL)
+- `email` (VARCHAR 255, UNIQUE, NOT NULL)
+- `phone` (VARCHAR 20)
+- `password_hash` (VARCHAR 255)
+- `language_pref` (ENUM: 'en', 'sw') DEFAULT 'en'
+- `created_at` (TIMESTAMP DEFAULT CURRENT_TIMESTAMP)
+
+### `categories` table
+- `id` (INT PK, Auto Increment)
+- `name_en` (VARCHAR 100)
+- `name_sw` (VARCHAR 100)
+- `icon_class` (VARCHAR 50) -- e.g., 'fa-wrench', 'fa-bolt'
+
+### `fundi_profiles` table
+- `user_id` (INT PK, FK -> users.id, ON DELETE CASCADE)
+- `category_id` (INT, FK -> categories.id)
+- `avatar_url` (VARCHAR 255)
+- `cover_url` (VARCHAR 255)
+- `bio` (TEXT)
+- `location` (VARCHAR 255)
+- `tvet_level` (ENUM: 'student', 'apprentice', 'master')
+- `is_verified` (BOOLEAN) DEFAULT FALSE
+- `rating` (DECIMAL 3,2) DEFAULT NULL
+- `review_count` (INT) DEFAULT 0
+
+### `jobs` (Job Postings/Requests) table
+- `id` (INT PK, Auto Increment)
+- `hirer_id` (INT, FK -> users.id)
+- `assigned_fundi_id` (INT NULL, FK -> users.id)
+- `category_id` (INT, FK -> categories.id)
+- `status` (ENUM: 'open', 'direct_request', 'in_progress', 'completed', 'cancelled') DEFAULT 'open'
+- `description` (TEXT)
+- `location` (VARCHAR 255)
+- `budget_expectation` (DECIMAL 10,2)
+- `created_at` (TIMESTAMP DEFAULT CURRENT_TIMESTAMP)
+
+### `job_bids` (Proposals) table
+- `id` (INT PK, Auto Increment)
+- `job_id` (INT, FK -> jobs.id, ON DELETE CASCADE)
+- `fundi_id` (INT, FK -> users.id)
+- `proposal_text` (TEXT)
+- `status` (ENUM: 'pending', 'accepted', 'rejected') DEFAULT 'pending'
+- `created_at` (TIMESTAMP DEFAULT CURRENT_TIMESTAMP)
+
+### `reviews` table
+- `id` (INT PK, Auto Increment)
+- `job_id` (INT, FK -> jobs.id)
+- `reviewer_id` (INT, FK -> users.id) -- the Hirer
+- `reviewee_id` (INT, FK -> users.id) -- the Fundi
+- `rating` (INT) CHECK (rating BETWEEN 1 AND 5)
+- `comment` (TEXT)
+- `created_at` (TIMESTAMP DEFAULT CURRENT_TIMESTAMP)
+
+## 5. Vanilla PHP / JS Implementation Strategy (For AI & Copilot)
+
+**Frontend Integration (Vanilla JS + HTML):**
+1. **HTML Canvas**: Recreate `index.html` including `<script src="https://cdn.tailwindcss.com"></script>`. Setup tailwind config inside the `<script>` tag to extend the `emerald` and `slate` colors as well as fonts and rounding overrides. Add the FontAwesome 6 CDNs.
+2. **Component Rendering**: Ditch React's JSX and instead use vanilla JavaScript Template Literals inside rendering functions. 
+   - Ex: `function renderArtisanCard(artisan) { return \`<div class="bg-slate-50 rounded-[3rem]...">\${artisan.name}</div>\` }`
+3. **State Management**: Implement a simple state object: `let state = { role: 'hirer', tab: 'home', lang: 'en', searchQuery: '' };` 
+   - Build a `setState(props)` function that merges state and calls a global `render()` tree.
+4. **AJAX vs Multi-Page**: For the most App-like feel (replicating React), keep it an SPA (Single Page Application). Handle views using DOM replacement. Use `fetch()` to call PHP API endpoints.
+
+**Backend Integration (PHP API):**
+1. **Directory Routing**: 
+   - Expose a directory like `/api/v1/`. Treat PHP files as JSON output APIs only (e.g., `header("Content-Type: application/json");`).
+   - E.g., `GET /api/v1/fundis.php?category=plumber` queries the `fundi_profiles` and returns JSON.
+   - E.g., `POST /api/v1/jobs.php` inserts a new job record.
+2. **Database Connect**: Use PHP PDO specifically. Prepared statements must be used across the board.
+```php
+$pdo = new PDO("mysql:host=localhost;dbname=mbokahub_db", $user, $password);
+$stmt = $pdo->prepare("SELECT * FROM users WHERE role = ?");
+$stmt->execute(['fundi']);
+$fundis = $stmt->fetchAll(PDO::FETCH_ASSOC);
+echo json_encode($fundis);
+```
+3. **Authentication**: Handle session logic in PHP using lightweight JWT (JSON Web Tokens) generated in PHP and stored in HTTPOnly cookies or LocalStorage, depending on cross-origin needs. 
+
+**AI Implementation (PHP cURL to Gemini):**
+Instead of Node's `@google/genai` library, use PHP `cURL` inside `/api/v1/gemini.php`:
+```php
+$userPrompt = $_POST['prompt'] ?? '';
+$apiKey = getenv('GEMINI_API_KEY');
+
+$data = [
+  'contents' => [
+     ['parts' => [['text' => $userPrompt]]]
+  ],
+  'systemInstruction' => [
+     'role' => 'system', 
+     'parts' => [['text' => 'You are MbokaHub Assistant...']]
+  ]
+];
+
+$ch = curl_init("https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" . $apiKey);
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
+curl_setopt($ch, CURLOPT_POST, true);
+curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
+$response = curl_exec($ch);
+curl_close($ch);
+
+echo $response;
+```
+
+With this architectural breakdown and the exact replica design specifications, GitHub Copilot or any AI can seamlessly recreate `MbokaHub` natively in vanilla Web Languages and PHP.
