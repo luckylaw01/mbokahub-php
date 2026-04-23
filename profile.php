@@ -62,6 +62,7 @@ try {
 $portfolio_items = [];
 $experiences = [];
 $certifications = [];
+$gigs = [];
 
 if ($role === "fundi") {
     try {
@@ -76,6 +77,10 @@ if ($role === "fundi") {
         $stmt = $pdo->prepare("SELECT * FROM certifications WHERE user_id = ? ORDER BY issue_date DESC");
         $stmt->execute([$user_id]);
         $certifications = $stmt->fetchAll();
+
+        $stmt = $pdo->prepare("SELECT * FROM gigs WHERE user_id = ? ORDER BY created_at DESC");
+        $stmt->execute([$user_id]);
+        $gigs = $stmt->fetchAll();
     } catch (PDOException $e) {
         // Silently fail or log
     }
@@ -274,6 +279,44 @@ include "includes/header.php";
                         <?php endforeach; ?>
                     </div>
                 </section>
+
+                <section>
+                    <div class="flex items-center justify-between mb-6 px-2">
+                        <h3 class="text-2xl font-black text-slate-900">Active Gigs</h3>
+                        <button onclick="openAddGig()" class="w-10 h-10 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center hover:bg-indigo-500 hover:text-white transition-all shadow-lg active:scale-95">
+                            <i class="fas fa-bolt"></i>
+                        </button>
+                    </div>
+
+                    <div class="space-y-4">
+                        <?php if (empty($gigs)): ?>
+                        <div class="text-center p-8 bg-slate-50 rounded-[2rem] border-2 border-dashed border-slate-100">
+                             <p class="text-[10px] font-black uppercase text-slate-300">No gigs listed yet</p>
+                        </div>
+                        <?php endif; ?>
+
+                        <?php foreach ($gigs as $gig): ?>
+                        <div class="bg-indigo-50/30 p-5 rounded-[2.5rem] border <?php echo $gig['is_active'] ? 'border-indigo-100/50' : 'border-slate-200 opacity-75'; ?> flex items-center gap-4 group hover:bg-white transition-all cursor-pointer">
+                            <div class="w-16 h-16 bg-white rounded-2xl shadow-sm flex items-center justify-center text-indigo-500 overflow-hidden">
+                                <?php if ($gig["image_url"]): ?>
+                                    <img src="<?php echo htmlspecialchars($gig["image_url"]); ?>" class="w-full h-full object-cover">
+                                <?php else: ?>
+                                    <i class="fas <?php echo $gig['is_active'] ? 'fa-tools' : 'fa-check-circle'; ?> text-xl"></i>
+                                <?php endif; ?>
+                            </div>
+                            <div class="flex-1">
+                                <h4 class="text-sm font-black text-slate-900 group-hover:text-indigo-600 transition-colors">
+                                    <?php echo htmlspecialchars($gig["title"]); ?>
+                                    <?php if (!$gig['is_active']): ?>
+                                        <span class="ml-1 text-[8px] px-2 py-0.5 bg-slate-200 text-slate-500 rounded-full uppercase">Verified Completion</span>
+                                    <?php endif; ?>
+                                </h4>
+                                <p class="text-[10px] font-bold text-emerald-600 uppercase tracking-tighter">Starting at KSh <?php echo number_format($gig["price_amount"]); ?></p>
+                            </div>
+                        </div>
+                        <?php endforeach; ?>
+                    </div>
+                </section>
             </div>
         </div>
         <?php endif; ?>
@@ -450,6 +493,19 @@ function openPortfolioModal(action, title) {
                 <input type="date" name="issue_date" class="w-full bg-slate-50 border-2 border-transparent focus:border-emerald-500/20 rounded-2xl p-4 text-sm font-bold outline-none">
             </div>
         `;
+    } else if (action === 'add_gig') {
+        uploadArea.classList.remove('hidden');
+        titleLabel.innerText = 'Service Title (e.g. Toilet Repair)';
+        fields.innerHTML = `
+            <div class="space-y-2">
+                <label class="block text-[10px] font-black uppercase text-slate-400 ml-2">Starting Price (KSh)</label>
+                <input type="number" name="price" required placeholder="1500" class="w-full bg-slate-50 border-2 border-transparent focus:border-emerald-500/20 rounded-2xl p-4 text-sm font-bold outline-none">
+            </div>
+            <div class="space-y-2">
+                <label class="block text-[10px] font-black uppercase text-slate-400 ml-2">Quick Description</label>
+                <textarea name="description" placeholder="Short summary of what you offer..." class="w-full bg-slate-50 border-2 border-transparent focus:border-emerald-500/20 rounded-2xl p-4 text-sm font-bold outline-none"></textarea>
+            </div>
+        `;
     }
 }
 
@@ -461,6 +517,7 @@ function closePortfolioModal() {
 function openAddPortfolio() { openPortfolioModal('add_portfolio', 'Add Project'); }
 function openAddExperience() { openPortfolioModal('add_experience', 'Add Experience'); }
 function openAddCert() { openPortfolioModal('add_cert', 'Add Certification'); }
+function openAddGig() { openPortfolioModal('add_gig', 'Create Quick Gig'); }
 
 function previewProjectImage(input) {
     if (input.files && input.files[0]) {

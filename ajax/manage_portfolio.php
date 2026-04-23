@@ -67,6 +67,29 @@ try {
             echo json_encode(['success' => true]);
             break;
 
+        case 'add_gig':
+            $title = filter_input(INPUT_POST, 'title', FILTER_SANITIZE_SPECIAL_CHARS);
+            $price = filter_input(INPUT_POST, 'price', FILTER_VALIDATE_FLOAT);
+            $description = filter_input(INPUT_POST, 'description', FILTER_SANITIZE_SPECIAL_CHARS);
+            
+            $db_path = null;
+            if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
+                $file = $_FILES['image'];
+                $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
+                $upload_dir = '../assets/images/gigs/';
+                if (!is_dir($upload_dir)) mkdir($upload_dir, 0777, true);
+                $filename = 'gig_' . $user_id . '_' . time() . '.' . $ext;
+                if (move_uploaded_file($file['tmp_name'], $upload_dir . $filename)) {
+                    $db_path = 'assets/images/gigs/' . $filename;
+                }
+            }
+
+            // Manually created gigs are ALWAYS active (is_active = 1)
+            $stmt = $pdo->prepare("INSERT INTO gigs (user_id, title, price_amount, description, image_url, is_active) VALUES (?, ?, ?, ?, ?, 1)");
+            $stmt->execute([$user_id, $title, $price, $description, $db_path]);
+            echo json_encode(['success' => true]);
+            break;
+
         default:
             echo json_encode(['success' => false, 'message' => 'Invalid action.']);
     }
