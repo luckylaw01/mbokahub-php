@@ -263,16 +263,132 @@ function openJobModal(id) {
                     <p class="text-slate-600 text-sm leading-relaxed">${data.description}</p>
                 </div>
 
-                <div class="flex flex-col sm:flex-row gap-4">
-                    <button class="flex-1 bg-emerald-500 text-white py-4 rounded-2xl font-bold hover:bg-emerald-600 hover:scale-105 active:scale-95 transition-all shadow-xl shadow-emerald-100">
-                        Apply to this Job
-                    </button>
-                    <button class="flex-1 bg-white text-slate-900 border-2 border-slate-100 py-4 rounded-2xl font-bold hover:bg-slate-50 transition-all">
+                <div id="bid-form-container" class="hidden mb-10 bg-slate-50 p-6 rounded-3xl border-2 border-dashed border-slate-200">
+                    <h4 class="font-bold text-slate-900 mb-4">Submit Your Proposal</h4>
+                    <form id="bid-form">
+                        <input type="hidden" name="job_id" value="${id}">
+                        <textarea name="proposal_text" rows="4" 
+                            class="w-full bg-white border-2 border-slate-100 rounded-2xl p-4 text-sm focus:border-emerald-500 focus:outline-none transition-all mb-4" 
+                            placeholder="Tell the client why you are the best fit for this job..."></textarea>
+                        <div class="flex gap-3">
+                            <button type="submit" class="flex-1 bg-emerald-500 text-white py-3 rounded-xl font-bold hover:bg-emerald-600 transition-all">
+                                Send Proposal
+                            </button>
+                            <button type="button" onclick="toggleBidForm()" class="flex-1 bg-slate-200 text-slate-600 py-3 rounded-xl font-bold hover:bg-slate-300 transition-all">
+                                Cancel
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="flex flex-col sm:flex-row gap-4" id="modal-actions">
+                    ${data.user_bid_id ? `
+                        <button onclick="dropBid(${id})" class="flex-[2] bg-rose-50 text-rose-600 border-2 border-rose-100 py-4 rounded-2xl font-bold hover:bg-rose-100 transition-all flex items-center justify-center gap-2">
+                             <i class="fas fa-times-circle"></i> Drop this Job
+                        </button>
+                    ` : `
+                        <button id="apply-btn" onclick="toggleBidForm()" class="flex-[2] bg-emerald-500 text-white py-4 rounded-2xl font-bold hover:bg-emerald-600 hover:scale-105 active:scale-95 transition-all shadow-xl shadow-emerald-100">
+                            Apply to this Job
+                        </button>
+                    `}
+                    <button id="save-btn" onclick="saveJobForLater(${id})" class="flex-1 bg-white text-slate-900 border-2 border-slate-100 py-4 rounded-2xl font-bold hover:bg-slate-50 transition-all">
                         Save for Later
                     </button>
                 </div>
             `;
+
+            // Debug: Log data
+            console.log('Job data loaded:', data);
+
+            // Handle Bid Form Submission
+            const bidForm = document.getElementById('bid-form');
+            if (bidForm) {
+                console.log('Bid form attached for job:', id);
+                bidForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    console.log('Bid form submitted');
+                    const formData = new FormData(this);
+                    
+                    fetch('ajax/submit_bid.php', {
+                        method: 'POST',
+                        body: formData
+                    })
+                    .then(response => {
+                        console.log('Fetch response received:', response.status);
+                        return response.json();
+                    })
+                    .then(result => {
+                        console.log('Parsed result:', result);
+                        if (result.success) {
+                            alert(result.message);
+                            closeModal();
+                        } else {
+                            alert(result.message);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Fetch error:', error);
+                        alert('An unexpected error occurred. Please try again.');
+                    });
+                });
+            } else {
+                console.error('Bid form NOT found in DOM');
+            }
+        })
+        .catch(err => {
+            console.error('Modal loading error:', err);
+            content.innerHTML = `<p class="text-rose-500 font-bold">Failed to load job details.</p>`;
         });
+}
+
+function toggleBidForm() {
+    const formContainer = document.getElementById('bid-form-container');
+    const actions = document.getElementById('modal-actions');
+    formContainer.classList.toggle('hidden');
+    actions.classList.toggle('hidden');
+}
+
+function saveJobForLater(jobId) {
+    const formData = new FormData();
+    formData.append('job_id', jobId);
+
+    fetch('ajax/save_job.php', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(result => {
+        alert(result.message);
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('An unexpected error occurred.');
+    });
+}
+
+function dropBid(jobId) {
+    if (!confirm('Are you sure you want to drop this job? This will remove your application/bid.')) return;
+
+    const formData = new FormData();
+    formData.append('job_id', jobId);
+
+    fetch('ajax/drop_bid.php', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(result => {
+        if (result.success) {
+            alert(result.message);
+            location.reload(); // Refresh to update status
+        } else {
+            alert(result.message);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('An unexpected error occurred.');
+    });
 }
 
 function closeModal() {

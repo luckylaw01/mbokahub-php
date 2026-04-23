@@ -82,9 +82,11 @@ try {
         ");
         $feed_items = $stmt->fetchAll();
     } else {
-        // Fetch open jobs for the fundi
-        $stmt = $pdo->query("
-            SELECT j.*, c.name_en as category_name, c.icon_class, u.first_name, u.last_name
+        // Fetch open jobs for the fundi, including information on whether they have already bid
+        $fundi_id = $_SESSION['user_id'] ?? 0;
+        $stmt = $pdo->prepare("
+            SELECT j.*, c.name_en as category_name, c.icon_class, u.first_name, u.last_name,
+                   (SELECT id FROM job_bids WHERE job_id = j.id AND fundi_id = ?) as user_bid_id
             FROM jobs j
             JOIN categories c ON j.category_id = c.id
             JOIN users u ON j.user_id = u.id
@@ -92,6 +94,7 @@ try {
             ORDER BY j.created_at DESC
             LIMIT 10
         ");
+        $stmt->execute([$fundi_id]);
         $feed_items = $stmt->fetchAll();
     }
 } catch (PDOException $e) {
@@ -361,9 +364,17 @@ include 'includes/header.php';
                                             class="flex-1 md:flex-none bg-white text-slate-900 px-6 py-4 rounded-xl font-bold text-xs md:text-sm shadow-sm hover:bg-slate-900 hover:text-white transition-all text-center">
                                         <?php echo $t['view_details']; ?>
                                     </button>
-                                    <button class="flex-1 md:flex-none bg-emerald-500 text-white px-8 py-4 rounded-xl font-bold text-xs md:text-sm shadow-xl shadow-emerald-200 hover:bg-emerald-600 hover:scale-105 active:scale-95 transition-all text-center">
-                                        <?php echo $t['place_bid']; ?>
-                                    </button>
+                                    <?php if (isset($job['user_bid_id']) && $job['user_bid_id']): ?>
+                                        <button disabled 
+                                                class="flex-1 md:flex-none bg-slate-100 text-slate-400 px-8 py-4 rounded-xl font-bold text-xs md:text-sm cursor-not-allowed text-center">
+                                            <i class="fas fa-check-circle mr-2"></i>Applied
+                                        </button>
+                                    <?php else: ?>
+                                        <button onclick="openJobModal(<?php echo (int)$job['id']; ?>)" 
+                                                class="flex-1 md:flex-none bg-emerald-500 text-white px-8 py-4 rounded-xl font-bold text-xs md:text-sm shadow-xl shadow-emerald-200 hover:bg-emerald-600 hover:scale-105 active:scale-95 transition-all text-center">
+                                            <?php echo $t['place_bid']; ?>
+                                        </button>
+                                    <?php endif; ?>
                                 </div>
                             </div>
                             <div class="bg-white/50 p-4 md:p-5 rounded-2xl">

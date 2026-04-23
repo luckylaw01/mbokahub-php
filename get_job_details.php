@@ -1,4 +1,5 @@
 <?php
+session_start();
 header('Content-Type: application/json');
 require_once 'includes/db_connect.php';
 
@@ -8,6 +9,7 @@ if (!isset($_GET['id'])) {
 }
 
 $job_id = (int)$_GET['id'];
+$user_id = $_SESSION['user_id'] ?? 0;
 
 try {
     $stmt = $pdo->prepare("
@@ -15,13 +17,14 @@ try {
             j.*,
             c.name_en as category_name,
             c.icon_class,
-            u.first_name as hirer_name
+            u.first_name as hirer_name,
+            (SELECT id FROM job_bids WHERE job_id = j.id AND fundi_id = ?) as user_bid_id
         FROM jobs j
         JOIN categories c ON j.category_id = c.id
         JOIN users u ON j.user_id = u.id
         WHERE j.id = ?
     ");
-    $stmt->execute([$job_id]);
+    $stmt->execute([$user_id, $job_id]);
     $job = $stmt->fetch(PDO::FETCH_ASSOC);
 
     if (!$job) {
