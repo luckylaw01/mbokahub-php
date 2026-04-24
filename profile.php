@@ -143,6 +143,12 @@ include "includes/header.php";
 
                 <div class="flex flex-col gap-3 w-full md:w-auto">
                     <button onclick="openEditProfile()" class="w-full md:w-48 py-4 bg-slate-900 text-white rounded-2xl font-bold shadow-xl hover:scale-105 transition-all">Edit Profile</button>
+                    <!-- Shareable Portfolio Link -->
+                    <?php if ($role === "fundi"): ?>
+                    <button onclick="copyPortfolioLink()" class="w-full md:w-48 py-4 bg-emerald-50 text-emerald-600 rounded-2xl font-bold hover:bg-emerald-100 transition-all flex items-center justify-center gap-2">
+                        <i class="fas fa-share-nodes"></i> Share Portfolio
+                    </button>
+                    <?php endif; ?>
                     <a href="logout.php" class="w-full md:w-48 py-4 bg-rose-50 text-rose-600 text-center rounded-2xl font-bold hover:bg-rose-100 transition-all">Sign Out</a>
                 </div>
             </div>
@@ -518,6 +524,19 @@ function openAddPortfolio() { openPortfolioModal('add_portfolio', 'Add Project')
 function openAddExperience() { openPortfolioModal('add_experience', 'Add Experience'); }
 function openAddCert() { openPortfolioModal('add_cert', 'Add Certification'); }
 function openAddGig() { openPortfolioModal('add_gig', 'Create Quick Gig'); }
+
+function copyPortfolioLink() {
+    const userId = <?php echo $user_id; ?>;
+    const url = window.location.origin + '/mbokahub/fundi/portfolio/?id=' + userId;
+    
+    if (navigator.clipboard) {
+        navigator.clipboard.writeText(url).then(() => {
+            alert('Portfolio link copied to clipboard!');
+        });
+    } else {
+        alert('Your shareable link: ' + url);
+    }
+}
 
 function previewProjectImage(input) {
     if (input.files && input.files[0]) {
