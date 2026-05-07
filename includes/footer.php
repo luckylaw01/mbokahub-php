@@ -68,7 +68,7 @@
     </div>
 
     <!-- Scripts -->
-    <script src="assets/js/main.js"></script>
+    <script src="assets/js/main.js?v=20260425"></script>
     <footer class="bg-white border-t border-slate-100 py-12 md:py-20 mt-20">
         <div class="max-w-7xl mx-auto px-4 md:px-6 text-center">
             <p class="text-slate-400 text-xs font-bold uppercase tracking-widest mb-4">© 2024 MbokaHub Artisan Marketplace</p>

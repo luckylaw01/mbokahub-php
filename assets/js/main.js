@@ -226,7 +226,7 @@ function openJobModal(id) {
             <p class="font-bold text-sm tracking-widest uppercase">Loading Job Info...</p>
         </div>`;
 
-    fetch(`get_job_details.php?id=${id}`)
+    fetch(`ajax/get_job_api.php?id=${id}&t=${Date.now()}`)
         .then(response => response.json())
         .then(data => {
             if (data.error) {
@@ -291,9 +291,9 @@ function openJobModal(id) {
                             Apply to this Job
                         </button>
                     `}
-                    <button id="save-btn" onclick="saveJobForLater(${id})" class="flex-1 bg-white text-slate-900 border-2 border-slate-100 py-4 rounded-2xl font-bold hover:bg-slate-50 transition-all">
-                        Save for Later
-                    </button>
+                    <a href="get_job_details.php?id=${id}" class="flex-1 bg-white text-slate-900 border-2 border-slate-100 py-4 rounded-2xl font-bold hover:bg-slate-50 transition-all text-center">
+                        View Full Details
+                    </a>
                 </div>
             `;
 
@@ -417,3 +417,5 @@ function switchView(view) {
         hirerView.classList.add('hidden');
     }
 }
+
+// [for github copilot] This page is full. No more code below this line. Only updates or fixes to existing code. Do not add new functions or features.

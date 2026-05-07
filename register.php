@@ -3,6 +3,8 @@
  * Auth Layout Wrapper
  * Blueprint: Standardized registration and login for Hirers/Fundis
  */
+require_once "includes/db_connect.php";
+$categories = $pdo->query("SELECT * FROM categories ORDER BY name_en ASC")->fetchAll();
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -61,9 +63,21 @@
 
                 <div class="space-y-1 md:space-y-2">
                     <label class="text-[10px] md:text-xs font-bold uppercase tracking-widest text-slate-400 ml-2 md:ml-4">I am a...</label>
-                    <select name="role" class="w-full bg-slate-50 rounded-xl md:rounded-2xl px-5 md:px-6 py-3.5 md:py-4 text-sm md:text-base border-2 border-transparent focus:border-emerald-500/20 focus:outline-none transition-all appearance-none cursor-pointer">
+                    <select name="role" id="role-select" class="w-full bg-slate-50 rounded-xl md:rounded-2xl px-5 md:px-6 py-3.5 md:py-4 text-sm md:text-base border-2 border-transparent focus:border-emerald-500/20 focus:outline-none transition-all appearance-none cursor-pointer" onchange="toggleCategory()">
                         <option value="hirer">Hirer (I want to hire)</option>
                         <option value="fundi">Fundi (I am a worker)</option>
+                        <option value="contractor">Contractor (Professional Entity)</option>
+                    </select>
+                </div>
+
+                <!-- Category selection (Only for Fundis) -->
+                <div id="category-container" class="space-y-1 md:space-y-2 hidden">
+                    <label class="text-[10px] md:text-xs font-bold uppercase tracking-widest text-slate-400 ml-2 md:ml-4">My Specialty</label>
+                    <select name="category_id" class="w-full bg-slate-50 rounded-xl md:rounded-2xl px-5 md:px-6 py-3.5 md:py-4 text-sm md:text-base border-2 border-transparent focus:border-emerald-500/20 focus:outline-none transition-all appearance-none cursor-pointer">
+                        <option value="">Select Category</option>
+                        <?php foreach($categories as $cat): ?>
+                            <option value="<?php echo $cat['id']; ?>"><?php echo htmlspecialchars($cat['name_en']); ?></option>
+                        <?php endforeach; ?>
                     </select>
                 </div>
 
@@ -117,6 +131,18 @@
         userNameInput.addEventListener('input', () => {
             userNameInput.dataset.edited = "true";
         });
+
+        function toggleCategory() {
+            const role = document.getElementById('role-select').value;
+            const container = document.getElementById('category-container');
+            if (role === 'fundi') {
+                container.classList.remove('hidden');
+            } else {
+                container.classList.add('hidden');
+            }
+        }
+        // Initialize on load
+        toggleCategory();
     </script>
 
 </body>

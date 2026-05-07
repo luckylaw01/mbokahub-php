@@ -62,6 +62,8 @@ try {
         $last_name = filter_input(INPUT_POST, 'last_name', FILTER_SANITIZE_SPECIAL_CHARS);
         $location = filter_input(INPUT_POST, 'location', FILTER_SANITIZE_SPECIAL_CHARS);
         $bio = filter_input(INPUT_POST, 'bio', FILTER_SANITIZE_SPECIAL_CHARS);
+        $category_id = filter_input(INPUT_POST, 'category_id', FILTER_SANITIZE_NUMBER_INT);
+        $tvet_level = filter_input(INPUT_POST, 'tvet_level', FILTER_SANITIZE_SPECIAL_CHARS);
 
         // Start transaction
         $pdo->beginTransaction();
@@ -75,8 +77,8 @@ try {
 
         // Update fundi specific info
         if ($role === 'fundi') {
-            $stmt2 = $pdo->prepare("UPDATE fundi_profiles SET location = ?, bio = ? WHERE user_id = ?");
-            $stmt2->execute([$location, $bio, $user_id]);
+            $stmt2 = $pdo->prepare("UPDATE fundi_profiles SET location = ?, bio = ?, category_id = ?, tvet_level = ? WHERE user_id = ?");
+            $stmt2->execute([$location, $bio, $category_id ?: null, $tvet_level, $user_id]);
         }
 
         $pdo->commit();

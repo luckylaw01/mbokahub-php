@@ -47,7 +47,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             header("Location: login.php?error=invalid");
             exit();
         }
-
     } catch (PDOException $e) {
         die("An error occurred: " . $e->getMessage());
     }

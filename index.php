@@ -5,6 +5,7 @@
  */
 require_once 'includes/db_connect.php';
 require_once 'includes/translations.php';
+require_once 'includes/rating_helper.php';
 session_start();
 
 // Handle Language Switching
@@ -40,8 +41,14 @@ $user_name = $is_logged_in ? $_SESSION['name'] : '';
 $user_role = $is_logged_in ? $_SESSION['role'] : 'hirer';
 
 // Initial Dashboard View logic
-// If fundi, default to 'work', otherwise default to 'hire'
-$initial_view = ($user_role === 'fundi') ? 'work' : 'hire';
+// If fundi or contractor, default to 'work' (find projects/gigs), otherwise default to 'hire'
+$initial_view = ($user_role === 'fundi' || $user_role === 'contractor') ? 'work' : 'hire';
+
+// Redirect Admin to their specialized dashboard
+if ($user_role === 'admin') {
+    header("Location: admin/index.php");
+    exit();
+}
 
 // Fetch initial categories for the grid from DB
 try {
@@ -70,16 +77,36 @@ try {
 $feed_items = [];
 try {
     if ($initial_view === 'hire') {
-        // Fetch top fundis for the hirer
-        $stmt = $pdo->query("
-            SELECT u.id, u.first_name, u.last_name, u.user_name, f.specialization, f.rating, f.location, c.icon_class
+        // Search & Filter Logic
+        $search = $_GET['search'] ?? '';
+        $category_filter = $_GET['category'] ?? '';
+        
+        $query = "
+            SELECT u.id as user_id, u.first_name, u.last_name, u.user_name, f.location, f.rating, c.icon_class, IFNULL(c.name_en, 'Artisan') as specialization
             FROM users u
             JOIN fundi_profiles f ON u.id = f.user_id
-            JOIN categories c ON f.category_id = c.id
+            LEFT JOIN categories c ON f.category_id = c.id
             WHERE u.role = 'fundi'
-            ORDER BY f.rating DESC
-            LIMIT 10
-        ");
+        ";
+        
+        $params = [];
+        if (!empty($search)) {
+            $query .= " AND (u.first_name LIKE ? OR u.last_name LIKE ? OR f.bio LIKE ? OR f.location LIKE ?)";
+            $params[] = "%$search%";
+            $params[] = "%$search%";
+            $params[] = "%$search%";
+            $params[] = "%$search%";
+        }
+        
+        if (!empty($category_filter)) {
+            $query .= " AND f.category_id = ?";
+            $params[] = $category_filter;
+        }
+        
+        $query .= " ORDER BY f.rating DESC LIMIT 10";
+        
+        $stmt = $pdo->prepare($query);
+        $stmt->execute($params);
         $feed_items = $stmt->fetchAll();
     } else {
         // Fetch open jobs for the fundi, including information on whether they have already bid
@@ -185,14 +212,15 @@ include 'includes/header.php';
                     <h2 class="text-3xl md:text-6xl font-extrabold mb-6 md:mb-8 tracking-tight text-slate-900 leading-tight">
                         <?php echo $t['hero_title']; ?>
                     </h2>
-                    <div class="relative max-w-3xl mx-auto">
+                    <form action="index.php" method="GET" class="relative max-w-3xl mx-auto">
                         <i class="fas fa-search absolute left-6 md:left-8 top-1/2 -translate-y-1/2 text-slate-400 text-base md:text-lg"></i>
-                        <input type="text" placeholder="<?php echo $t['search_placeholder']; ?>" 
+                        <input type="text" name="search" placeholder="<?php echo $t['search_placeholder']; ?>" 
+                               value="<?php echo htmlspecialchars($_GET['search'] ?? ''); ?>"
                                class="w-full bg-slate-50 rounded-[1.5rem] md:rounded-[2rem] px-12 md:px-16 py-5 md:py-7 text-sm md:text-lg border-2 border-transparent focus:border-emerald-500/30 focus:outline-none shadow-inner transition-all">
-                        <button class="hidden md:block absolute right-4 top-1/2 -translate-y-1/2 bg-slate-900 text-white px-10 py-4 rounded-[1.5rem] font-bold hover:scale-105 active:scale-95 transition-all shadow-lg">
+                        <button type="submit" class="hidden md:block absolute right-4 top-1/2 -translate-y-1/2 bg-slate-900 text-white px-10 py-4 rounded-[1.5rem] font-bold hover:scale-105 active:scale-95 transition-all shadow-lg">
                             <?php echo $t['search_btn']; ?>
                         </button>
-                    </div>
+                    </form>
                     <?php if ($is_logged_in && $_SESSION['role'] === 'hirer'): ?>
                     <button onclick="openPostJobWizard()" class="mt-6 md:mt-10 inline-flex items-center gap-3 bg-emerald-500 text-white px-8 py-4 rounded-2xl font-bold shadow-xl shadow-emerald-200 hover:bg-emerald-600 hover:scale-105 active:scale-95 transition-all">
                         <i class="fas fa-plus-circle"></i>
@@ -214,14 +242,14 @@ include 'includes/header.php';
                 
                 <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 md:gap-6">
                     <?php foreach ($categories as $cat): ?>
-                    <div class="bg-white p-5 md:p-8 rounded-[1.5rem] md:rounded-[2.5rem] border border-slate-100 hover:border-emerald-200 hover:shadow-xl hover:shadow-emerald-500/5 transition-all group cursor-pointer text-center">
-                        <div class="w-12 h-12 md:w-16 md:h-16 bg-slate-50 rounded-xl md:rounded-2xl flex items-center justify-center mx-auto mb-3 md:mb-6 group-hover:bg-emerald-500 group-hover:text-white transition-all">
+                    <a href="index.php?category=<?php echo $cat['id']; ?>" class="bg-white p-5 md:p-8 rounded-[1.5rem] md:rounded-[2.5rem] border border-slate-100 <?php echo (isset($_GET['category']) && $_GET['category'] == $cat['id']) ? 'border-emerald-500 bg-emerald-50/30' : 'hover:border-emerald-200 hover:shadow-xl hover:shadow-emerald-500/5'; ?> transition-all group cursor-pointer text-center">
+                        <div class="w-12 h-12 md:w-16 md:h-16 <?php echo (isset($_GET['category']) && $_GET['category'] == $cat['id']) ? 'bg-emerald-500 text-white' : 'bg-slate-50'; ?> rounded-xl md:rounded-2xl flex items-center justify-center mx-auto mb-3 md:mb-6 group-hover:bg-emerald-500 group-hover:text-white transition-all">
                             <i class="fas <?php echo htmlspecialchars($cat['icon_class']); ?> text-xl md:text-2xl"></i>
                         </div>
                         <span class="font-bold text-xs md:text-sm text-slate-800 transition-colors group-hover:text-emerald-600 leading-tight">
                             <?php echo htmlspecialchars($cat['name_'.$current_lang]); ?>
                         </span>
-                    </div>
+                    </a>
                     <?php endforeach; ?>
                 </div>
             </section>
@@ -251,12 +279,13 @@ include 'includes/header.php';
                                     </div>
                                     <div>
                                         <h4 class="font-bold text-slate-900 group-hover:text-emerald-600 transition-colors"><?php echo htmlspecialchars($fundi['first_name'] . ' ' . $fundi['last_name']); ?></h4>
-                                        <p class="text-[10px] md:text-xs font-bold text-slate-400 uppercase tracking-widest leading-none mt-1"><?php echo htmlspecialchars($fundi['specialization']); ?></p>
+                                        <div class="text-[10px] font-black uppercase text-emerald-500 tracking-wider">
+                                            <?php echo htmlspecialchars($fundi['specialization']); ?>
+                                        </div>
+                                        <div class="mt-1">
+                                            <?php echo renderRating($fundi['rating']); ?>
+                                        </div>
                                     </div>
-                                </div>
-                                <div class="bg-amber-50 text-amber-600 px-3 py-1 rounded-full text-[10px] md:text-xs font-bold flex items-center gap-1">
-                                    <i class="fas fa-star text-[8px] md:text-[10px]"></i>
-                                    <?php echo number_format($fundi['rating'], 1); ?>
                                 </div>
                             </div>
                             

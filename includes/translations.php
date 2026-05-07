@@ -19,6 +19,8 @@ $lang = [
         'view_portfolio' => 'View Portfolio',
         'view_details' => 'View Details',
         'place_bid' => 'Place Bid',
+        'role_contractor' => 'Contractor',
+        'company_name' => 'Company Name',
     ],
     'sw' => [
         'hero_title' => 'Pata <span class="text-emerald-500 underline decoration-blue-500/30">Fundi</span> Bingwa',
@@ -39,5 +41,7 @@ $lang = [
         'view_portfolio' => 'Ona Kazi Zake',
         'view_details' => 'Maelezo Zaidi',
         'place_bid' => 'Omba Kazi',
+        'role_contractor' => 'Mkandarasi',
+        'company_name' => 'Jina la Kampuni',
     ]
 ];

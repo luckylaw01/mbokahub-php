@@ -12,6 +12,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $password = $_POST['password'] ?? '';
     $confirm_password = $_POST['confirm_password'] ?? '';
     $role = $_POST['role'] ?? 'hirer';
+    $category_id = $_POST['category_id'] ?? null;
 
     // Basic validation
     if (empty($first_name) || empty($last_name) || empty($user_name) || empty($email) || empty($password)) {
@@ -36,9 +37,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt->execute([$user_name, $first_name, $last_name, $email, $password_hash, $role]);
         $user_id = $pdo->lastInsertId();
 
-        // 2. If role is fundi, create an empty profile in fundi_profiles
+        // 2. Profile initialization based on role
         if ($role === 'fundi') {
-            $sql_profile = "INSERT INTO fundi_profiles (user_id) VALUES (?)";
+            $sql_profile = "INSERT INTO fundi_profiles (user_id, category_id) VALUES (?, ?)";
+            $stmt_profile = $pdo->prepare($sql_profile);
+            $stmt_profile->execute([$user_id, $category_id ?: null]);
+        } elseif ($role === 'contractor') {
+            $sql_profile = "INSERT INTO contractor_profiles (user_id) VALUES (?)";
             $stmt_profile = $pdo->prepare($sql_profile);
             $stmt_profile->execute([$user_id]);
         }

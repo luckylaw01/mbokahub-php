@@ -14,9 +14,8 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'hirer') {
 
 $hirer_id = $_SESSION['user_id'];
 $bid_id = filter_input(INPUT_POST, 'bid_id', FILTER_VALIDATE_INT);
-$job_id = filter_input(INPUT_POST, 'job_id', FILTER_VALIDATE_INT);
 
-if (!$bid_id || !$job_id) {
+if (!$bid_id) {
     echo json_encode(['success' => false, 'message' => 'Invalid parameters']);
     exit;
 }
@@ -24,16 +23,9 @@ if (!$bid_id || !$job_id) {
 try {
     $pdo->beginTransaction();
 
-    // 1. Verify this job belongs to the hirer
-    $jobStmt = $pdo->prepare("SELECT id FROM jobs WHERE id = ? AND user_id = ?");
-    $jobStmt->execute([$job_id, $hirer_id]);
-    if (!$jobStmt->fetch()) {
-        throw new Exception("Ownership verification failed.");
-    }
-
-    // 2. Get the fundi_id and job details for the gig creation
+    // 1. Get the bid details and parent job
     $bidDetailsStmt = $pdo->prepare("
-        SELECT b.fundi_id, j.title, j.budget_range, j.description 
+        SELECT b.fundi_id, b.job_id, j.title, j.budget_range, j.description, j.user_id as job_owner_id
         FROM job_bids b 
         JOIN jobs j ON b.job_id = j.id 
         WHERE b.id = ?
@@ -45,6 +37,11 @@ try {
         throw new Exception("Bid details not found.");
     }
 
+    if ($details['job_owner_id'] != $hirer_id) {
+        throw new Exception("Ownership verification failed.");
+    }
+
+    $job_id = $details['job_id'];
     $fundi_id = $details['fundi_id'];
     $title = $details['title'];
     $price = (float)$details['budget_range']; // Using job budget as initial gig price

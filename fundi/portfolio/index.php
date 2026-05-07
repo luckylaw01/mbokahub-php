@@ -56,6 +56,24 @@ try {
 
 $full_name = $fundi['first_name'] . ' ' . $fundi['last_name'];
 $profile_pic = $fundi['avatar_url'] ? "../../" . $fundi['avatar_url'] : null;
+
+// Determine category banner background
+$cat_slug = strtolower($fundi['cat_name'] ?? '');
+$bg_image_url = 'https://images.unsplash.com/photo-1581094794329-c8112a89af12?q=80&w=2070&auto=format&fit=crop'; // Default
+
+if (strpos($cat_slug, 'mason') !== false || strpos($cat_slug, 'build') !== false || strpos($cat_slug, 'construct') !== false) {
+    $bg_image_url = 'https://images.unsplash.com/photo-1503387762-592deb58ef4e?q=80&w=2071&auto=format&fit=crop'; // Masonry/Construction
+} elseif (strpos($cat_slug, 'ict') !== false || strpos($cat_slug, 'tech') !== false || strpos($cat_slug, 'computer') !== false || strpos($cat_slug, 'software') !== false || strpos($cat_slug, 'web') !== false) {
+    $bg_image_url = 'https://images.unsplash.com/photo-1518770660439-4636190af475?q=80&w=2070&auto=format&fit=crop'; // ICT/Tech
+} elseif (strpos($cat_slug, 'plumb') !== false) {
+    $bg_image_url = 'https://images.unsplash.com/photo-1585704032915-c3400ca199e7?q=80&w=2070&auto=format&fit=crop'; // Plumbing
+} elseif (strpos($cat_slug, 'electric') !== false) {
+    $bg_image_url = 'https://images.unsplash.com/photo-1621905252507-b35492cc74b4?q=80&w=2069&auto=format&fit=crop'; // Electrical
+} elseif (strpos($cat_slug, 'carpent') !== false || strpos($cat_slug, 'wood') !== false) {
+    $bg_image_url = 'https://images.unsplash.com/photo-1530124566582-a618bc2615dc?q=80&w=2070&auto=format&fit=crop'; // Carpentry
+} elseif (strpos($cat_slug, 'paint') !== false) {
+    $bg_image_url = 'https://images.unsplash.com/photo-1589939705384-5185137a7f0f?q=80&w=2070&auto=format&fit=crop'; // Painting
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -73,7 +91,7 @@ $profile_pic = $fundi['avatar_url'] ? "../../" . $fundi['avatar_url'] : null;
         
         /* Hero Background with Parallax Effect */
         .hero-banner {
-            background-image: linear-gradient(rgba(15, 23, 42, 0.8), rgba(15, 23, 42, 0.9)), url('https://images.unsplash.com/photo-1581094794329-c8112a89af12?q=80&w=2070&auto=format&fit=crop');
+            background-image: linear-gradient(rgba(15, 23, 42, 0.8), rgba(15, 23, 42, 0.9)), url('<?php echo $bg_image_url; ?>');
             background-size: cover;
             background-position: center;
             background-attachment: fixed;
@@ -113,7 +131,7 @@ $profile_pic = $fundi['avatar_url'] ? "../../" . $fundi['avatar_url'] : null;
 <body class="text-slate-900 leading-tight">
 
     <!-- Sticky Navigation -->
-    <nav class="fixed top-6 left-0 right-0 z-[100] px-4">
+    <nav id="main-nav" class="fixed top-6 left-0 right-0 z-[100] px-4 transition-transform duration-300">
         <div class="max-w-6xl mx-auto glass rounded-3xl p-3 flex items-center justify-between shadow-xl shadow-slate-200/50">
             <div class="flex items-center gap-3 ml-2">
                 <div class="w-10 h-10 vibrant-gradient rounded-xl flex items-center justify-center text-white font-black shadow-lg shadow-emerald-200">M</div>
@@ -324,5 +342,21 @@ $profile_pic = $fundi['avatar_url'] ? "../../" . $fundi['avatar_url'] : null;
         </div>
     </footer>
 
+    <script>
+        let lastScrollTop = 0;
+        const navbar = document.getElementById('main-nav');
+
+        window.addEventListener('scroll', function() {
+            let scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+            if (scrollTop > lastScrollTop && scrollTop > 100) {
+                // Scrolling down past 100px - hide navbar
+                navbar.style.transform = 'translateY(-150%)';
+            } else {
+                // Scrolling up - show navbar
+                navbar.style.transform = 'translateY(0)';
+            }
+            lastScrollTop = scrollTop;
+        });
+    </script>
 </body>
 </html>
