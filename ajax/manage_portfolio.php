@@ -3,6 +3,7 @@
  * AJAX Handler for Portfolio, Experience, and Certifications
  */
 require_once '../includes/db_connect.php';
+require_once '../includes/image_helper.php';
 session_start();
 
 header('Content-Type: application/json');
@@ -32,16 +33,28 @@ try {
             $upload_dir = '../assets/images/portfolio/';
             if (!is_dir($upload_dir)) mkdir($upload_dir, 0777, true);
 
-            $filename = 'project_' . $user_id . '_' . time() . '.' . $ext;
-            $target = $upload_dir . $filename;
-            $db_path = 'assets/images/portfolio/' . $filename;
+            $filename_webp = 'project_' . $user_id . '_' . time() . '.webp';
+            $target_webp = $upload_dir . $filename_webp;
+            $db_path_webp = 'assets/images/portfolio/' . $filename_webp;
 
-            if (move_uploaded_file($file['tmp_name'], $target)) {
+            if (compressAndConvertToWebp($file['tmp_name'], $target_webp, 80)) {
+                $db_path = $db_path_webp;
                 $stmt = $pdo->prepare("INSERT INTO portfolio_items (user_id, title, description, image_url, completion_date) VALUES (?, ?, ?, ?, ?)");
                 $stmt->execute([$user_id, $title, $description, $db_path, $completion_date]);
                 echo json_encode(['success' => true]);
             } else {
-                echo json_encode(['success' => false, 'message' => 'Upload failed.']);
+                // Fallback to original format
+                $filename = 'project_' . $user_id . '_' . time() . '.' . $ext;
+                $target = $upload_dir . $filename;
+                $db_path = 'assets/images/portfolio/' . $filename;
+
+                if (move_uploaded_file($file['tmp_name'], $target)) {
+                    $stmt = $pdo->prepare("INSERT INTO portfolio_items (user_id, title, description, image_url, completion_date) VALUES (?, ?, ?, ?, ?)");
+                    $stmt->execute([$user_id, $title, $description, $db_path, $completion_date]);
+                    echo json_encode(['success' => true]);
+                } else {
+                    echo json_encode(['success' => false, 'message' => 'Upload failed.']);
+                }
             }
             break;
 
@@ -78,9 +91,19 @@ try {
                 $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
                 $upload_dir = '../assets/images/gigs/';
                 if (!is_dir($upload_dir)) mkdir($upload_dir, 0777, true);
-                $filename = 'gig_' . $user_id . '_' . time() . '.' . $ext;
-                if (move_uploaded_file($file['tmp_name'], $upload_dir . $filename)) {
-                    $db_path = 'assets/images/gigs/' . $filename;
+                
+                $filename_webp = 'gig_' . $user_id . '_' . time() . '.webp';
+                $target_webp = $upload_dir . $filename_webp;
+                $db_path_webp = 'assets/images/gigs/' . $filename_webp;
+
+                if (compressAndConvertToWebp($file['tmp_name'], $target_webp, 80)) {
+                    $db_path = $db_path_webp;
+                } else {
+                    // Fallback to original format
+                    $filename = 'gig_' . $user_id . '_' . time() . '.' . $ext;
+                    if (move_uploaded_file($file['tmp_name'], $upload_dir . $filename)) {
+                        $db_path = 'assets/images/gigs/' . $filename;
+                    }
                 }
             }
 

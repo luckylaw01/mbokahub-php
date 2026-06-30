@@ -9,6 +9,9 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST' || !isset($_SESSION['user_id']) || $_S
 }
 
 try {
+    $assigned_fundi_id = isset($_POST['assigned_fundi_id']) && !empty($_POST['assigned_fundi_id']) ? (int)$_POST['assigned_fundi_id'] : null;
+    $status = $assigned_fundi_id ? 'direct_request' : 'open';
+
     $data = [
         ':user_id' => $_SESSION['user_id'],
         ':category_id' => (int)$_POST['category_id'],
@@ -16,11 +19,13 @@ try {
         ':description' => $_POST['description'],
         ':location' => $_POST['location'],
         ':budget_range' => $_POST['budget_range'],
-        ':urgency' => $_POST['urgency'] ?? 'standard'
+        ':urgency' => $_POST['urgency'] ?? 'standard',
+        ':assigned_fundi_id' => $assigned_fundi_id,
+        ':status' => $status
     ];
 
-    $sql = "INSERT INTO jobs (user_id, category_id, title, description, location, budget_range, urgency) 
-            VALUES (:user_id, :category_id, :title, :description, :location, :budget_range, :urgency)";
+    $sql = "INSERT INTO jobs (user_id, category_id, title, description, location, budget_range, urgency, assigned_fundi_id, status) 
+            VALUES (:user_id, :category_id, :title, :description, :location, :budget_range, :urgency, :assigned_fundi_id, :status)";
     
     $stmt = $pdo->prepare($sql);
     $result = $stmt->execute($data);

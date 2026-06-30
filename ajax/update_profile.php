@@ -3,6 +3,7 @@
  * AJAX Handler for Profile Updates & Avatar Uploads
  */
 require_once '../includes/db_connect.php';
+require_once '../includes/image_helper.php';
 session_start();
 
 header('Content-Type: application/json');
@@ -37,19 +38,69 @@ try {
             mkdir($upload_dir, 0777, true);
         }
 
-        $filename = 'user_' . $user_id . '_' . time() . '.' . $ext;
-        $target = $upload_dir . $filename;
-        $db_path = 'assets/images/profiles/' . $filename;
+        $filename_webp = 'user_' . $user_id . '_' . time() . '.webp';
+        $target_webp = $upload_dir . $filename_webp;
+        $db_path_webp = 'assets/images/profiles/' . $filename_webp;
 
-        if (move_uploaded_file($file['tmp_name'], $target)) {
-            // Update DB (fundi_profiles only)
+        // Try converting and compressing to WebP
+        if (compressAndConvertToWebp($file['tmp_name'], $target_webp, 80)) {
+            $db_path = $db_path_webp;
             if ($role === 'fundi') {
                 $stmt = $pdo->prepare("UPDATE fundi_profiles SET avatar_url = ? WHERE user_id = ?");
                 $stmt->execute([$db_path, $user_id]);
             }
-            // If we want hirers to have avatars too, we'd need to add that column to users or a separate table
-            
-            echo json_encode(['success' => true, 'message' => 'Avatar updated!', 'path' => $db_path]);
+            echo json_encode(['success' => true, 'message' => 'Avatar updated and compressed!', 'path' => $db_path]);
+        } else {
+            // Fallback to original behavior
+            $filename = 'user_' . $user_id . '_' . time() . '.' . $ext;
+            $target = $upload_dir . $filename;
+            $db_path = 'assets/images/profiles/' . $filename;
+
+            if (move_uploaded_file($file['tmp_name'], $target)) {
+                // Update DB (fundi_profiles only)
+                if ($role === 'fundi') {
+                    $stmt = $pdo->prepare("UPDATE fundi_profiles SET avatar_url = ? WHERE user_id = ?");
+                    $stmt->execute([$db_path, $user_id]);
+                }
+                echo json_encode(['success' => true, 'message' => 'Avatar updated!', 'path' => $db_path]);
+            } else {
+                echo json_encode(['success' => false, 'message' => 'Failed to move uploaded file.']);
+            }
+        }
+        exit;
+    }
+
+    // 1.5. Handle Resume Upload
+    if (isset($_FILES['resume'])) {
+        $file = $_FILES['resume'];
+        $allowed = ['pdf', 'doc', 'docx'];
+        $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
+
+        if (!in_array($ext, $allowed)) {
+            echo json_encode(['success' => false, 'message' => 'Invalid file type. Only PDF, DOC, and DOCX are allowed.']);
+            exit;
+        }
+
+        if ($file['size'] > 5 * 1024 * 1024) {
+            echo json_encode(['success' => false, 'message' => 'File too large (max 5MB).']);
+            exit;
+        }
+
+        $upload_dir = '../assets/documents/resumes/';
+        if (!is_dir($upload_dir)) {
+            mkdir($upload_dir, 0777, true);
+        }
+
+        $filename = 'resume_' . $user_id . '_' . time() . '.' . $ext;
+        $target = $upload_dir . $filename;
+        $db_path = 'assets/documents/resumes/' . $filename;
+
+        if (move_uploaded_file($file['tmp_name'], $target)) {
+            if ($role === 'fundi') {
+                $stmt = $pdo->prepare("UPDATE fundi_profiles SET resume_url = ? WHERE user_id = ?");
+                $stmt->execute([$db_path, $user_id]);
+            }
+            echo json_encode(['success' => true, 'message' => 'Resume updated successfully!', 'path' => $db_path]);
         } else {
             echo json_encode(['success' => false, 'message' => 'Failed to move uploaded file.']);
         }

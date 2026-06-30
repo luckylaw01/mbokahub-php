@@ -12,13 +12,15 @@ $fundi_id = (int)$_GET['id'];
 try {
     $stmt = $pdo->prepare("
         SELECT 
+            u.id as user_id,
             u.first_name, 
             u.last_name, 
             u.role,
-            fp.specialization, 
+            c.name_en as specialization, 
             fp.bio, 
             fp.location, 
             fp.rating,
+            fp.category_id,
             c.name_en as category_name,
             c.icon_class
         FROM users u

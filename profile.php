@@ -48,7 +48,8 @@ try {
             "bio" => $full_profile["bio"] ?? "",
             "avatar" => $full_profile["avatar_url"] ?? null,
             "tvet_level" => $full_profile["tvet_level"] ?? "student",
-            "is_verified" => $full_profile["is_verified"] ?? 0
+            "is_verified" => $full_profile["is_verified"] ?? 0,
+            "resume_url" => $full_profile["resume_url"] ?? null
         ];
     } elseif ($role === "contractor") {
         $stmt = $pdo->prepare("

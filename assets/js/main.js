@@ -60,13 +60,54 @@ function sendAIQuery() {
     }, 1500);
 }
 
-function openPostJobWizard() {
+let currentAssignedFundiId = null;
+
+function openPostJobWizard(preselectedCategoryId = null, fundiName = null, fundiId = null) {
     const modal = document.getElementById('info-modal');
     const content = document.getElementById('modal-content');
     const template = document.getElementById('job-wizard-template');
     
     modal.classList.remove('hidden');
     content.innerHTML = template.innerHTML;
+
+    if (preselectedCategoryId) {
+        const catSelect = document.getElementById('job-category');
+        if (catSelect) {
+            catSelect.value = preselectedCategoryId;
+        }
+    }
+
+    if (fundiId) {
+        currentAssignedFundiId = fundiId;
+    } else {
+        currentAssignedFundiId = null;
+    }
+
+    if (fundiName) {
+        const headerTitle = content.querySelector('h2');
+        if (headerTitle) {
+            headerTitle.innerText = `Hire ${fundiName}`;
+        }
+        const submitBtn = document.getElementById('wizard-submit');
+        if (submitBtn) {
+            submitBtn.innerText = 'Send Hire Request';
+        }
+    }
+
+    activeStep = 1; // Reset to first step
+}
+
+function handleDirectHire(fundiId, fundiName, categoryId) {
+    // Check if the user is a logged-in Hirer
+    const postJobBtnExists = document.querySelector('button[onclick^="openPostJobWizard"]') !== null;
+    if (!postJobBtnExists) {
+        alert("Please log in as a Hirer (Client) to hire an expert directly.");
+        window.location.href = 'login.php';
+        return;
+    }
+
+    closeModal();
+    openPostJobWizard(categoryId, fundiName, fundiId);
 }
 
 let activeStep = 1;
@@ -122,6 +163,10 @@ function submitJobRequest() {
     
     const urgency = document.querySelector('input[name="urgency"]:checked').value;
     formData.append('urgency', urgency);
+
+    if (currentAssignedFundiId) {
+        formData.append('assigned_fundi_id', currentAssignedFundiId);
+    }
 
     fetch('process_job_post.php', {
         method: 'POST',
@@ -204,10 +249,12 @@ function openFundiModal(id) {
                 </div>
 
                 <div class="flex flex-col sm:flex-row gap-4">
-                    <button class="flex-1 bg-slate-900 text-white py-4 rounded-2xl font-bold hover:bg-emerald-600 transition-all shadow-xl shadow-slate-200">
+                    <button onclick="handleDirectHire(${id}, '${data.first_name} ${data.last_name}', ${data.category_id})" 
+                            class="flex-1 bg-slate-900 text-white py-4 rounded-2xl font-bold hover:bg-emerald-600 transition-all shadow-xl shadow-slate-200">
                         Hire Now
                     </button>
-                    <button class="flex-1 bg-white text-slate-900 border-2 border-slate-100 py-4 rounded-2xl font-bold hover:bg-slate-50 transition-all">
+                    <button onclick="window.location.href='fundi/portfolio/index.php?id=${id}'" 
+                            class="flex-1 bg-white text-slate-900 border-2 border-slate-100 py-4 rounded-2xl font-bold hover:bg-slate-50 transition-all">
                         View Full Portfolio
                     </button>
                 </div>
