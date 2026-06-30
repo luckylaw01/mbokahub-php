@@ -203,6 +203,11 @@ if (strpos($cat_slug, 'mason') !== false || strpos($cat_slug, 'build') !== false
                             <a href="#projects" class="px-10 py-5 bg-white/10 backdrop-blur-md text-white border border-white/20 rounded-3xl font-black text-sm uppercase tracking-widest hover:bg-white/20 transition-all">
                                 Gallery
                             </a>
+                            <?php if (!empty($fundi['resume_url'])): ?>
+                            <a href="../../<?php echo htmlspecialchars($fundi['resume_url']); ?>" download class="px-10 py-5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-3xl font-black text-sm uppercase tracking-widest hover:scale-105 transition-all flex items-center gap-2">
+                                <i class="fas fa-file-pdf"></i> Resume
+                            </a>
+                            <?php endif; ?>
                         </div>
                     </div>
                 </div>
@@ -281,9 +286,14 @@ if (strpos($cat_slug, 'mason') !== false || strpos($cat_slug, 'build') !== false
                         <p class="text-white/80 text-sm font-medium mb-8 relative z-10 leading-relaxed">
                             I am currently available for new projects in <?php echo htmlspecialchars($fundi['location'] ?: 'your area'); ?>. 
                         </p>
-                        <a href="../../login.php" class="block w-full py-5 bg-white text-emerald-600 text-center rounded-3xl font-black shadow-xl hover:scale-105 transition-all relative z-10">
+                        <a href="../../login.php" class="block w-full py-5 bg-white text-emerald-600 text-center rounded-3xl font-black shadow-xl hover:scale-105 transition-all relative z-10 mb-3">
                             SEND A DIRECT REQUEST
                         </a>
+                        <?php if (!empty($fundi['resume_url'])): ?>
+                        <a href="../../<?php echo htmlspecialchars($fundi['resume_url']); ?>" download class="block w-full py-5 bg-slate-900 text-white text-center rounded-3xl font-black shadow-xl hover:bg-slate-800 transition-all relative z-10 flex items-center justify-center gap-2">
+                            <i class="fas fa-file-pdf text-rose-400"></i> DOWNLOAD RESUME (PDF/DOC)
+                        </a>
+                        <?php endif; ?>
                     </div>
 
                     <!-- Verified Certs -->
