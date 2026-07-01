@@ -227,22 +227,11 @@ include "includes/header.php";
                 <div class="flex flex-col gap-3 w-full md:w-auto">
                     <button onclick="openEditProfile()" class="w-full md:w-48 py-4 bg-slate-900 text-white rounded-2xl font-bold shadow-xl hover:scale-105 transition-all">Edit Profile</button>
                     
-                    <!-- Resume / CV Upload & Download -->
+                    <!-- Resume / CV Auto-Generation & Download -->
                     <?php if ($role === "fundi"): ?>
-                        <?php if (!empty($profile['resume_url'])): ?>
-                            <a href="<?php echo htmlspecialchars($profile['resume_url']); ?>" download class="w-full md:w-48 py-4 bg-indigo-600 text-white text-center rounded-2xl font-bold shadow-xl hover:scale-105 transition-all flex items-center justify-center gap-2">
-                                <i class="fas fa-file-pdf"></i> Download CV
-                            </a>
-                            <label for="resume-input" class="w-full md:w-48 py-4 bg-slate-100 text-slate-600 text-center rounded-2xl font-bold hover:bg-slate-200 transition-all flex items-center justify-center gap-2 cursor-pointer">
-                                <i class="fas fa-cloud-upload-alt"></i> Update CV
-                                <input type="file" id="resume-input" class="hidden" accept=".pdf,.doc,.docx" onchange="uploadResume(this)">
-                            </label>
-                        <?php else: ?>
-                            <label for="resume-input" class="w-full md:w-48 py-4 bg-indigo-50 text-indigo-600 text-center rounded-2xl font-bold hover:bg-indigo-100 transition-all flex items-center justify-center gap-2 cursor-pointer shadow-lg">
-                                <i class="fas fa-cloud-upload-alt"></i> Upload CV
-                                <input type="file" id="resume-input" class="hidden" accept=".pdf,.doc,.docx" onchange="uploadResume(this)">
-                            </label>
-                        <?php endif; ?>
+                    <a href="generate_resume.php?id=<?php echo $user_id; ?>" target="_blank" class="w-full md:w-48 py-4 bg-indigo-600 text-white text-center rounded-2xl font-bold shadow-xl hover:scale-105 transition-all flex items-center justify-center gap-2">
+                        <i class="fas fa-file-pdf text-rose-300"></i> Download Resume
+                    </a>
                     <?php endif; ?>
 
                     <!-- Shareable Portfolio Link -->
@@ -653,55 +642,6 @@ function openAddPortfolio() { openPortfolioModal('add_portfolio', 'Add Project')
 function openAddExperience() { openPortfolioModal('add_experience', 'Add Experience'); }
 function openAddCert() { openPortfolioModal('add_cert', 'Add Certification'); }
 function openAddGig() { openPortfolioModal('add_gig', 'Create Quick Gig'); }
-
-function uploadResume(input) {
-    if (input.files && input.files[0]) {
-        const file = input.files[0];
-        const allowed = ['pdf', 'doc', 'docx'];
-        const ext = file.name.split('.').pop().toLowerCase();
-        
-        if (!allowed.includes(ext)) {
-            alert('Invalid file format. Only PDF, DOC, and DOCX are allowed.');
-            return;
-        }
-        
-        if (file.size > 5 * 1024 * 1024) {
-            alert('File is too large. Max allowed size is 5MB.');
-            return;
-        }
-
-        const formData = new FormData();
-        formData.append('resume', file);
-
-        // Feedback (change button to loading)
-        const label = input.closest('label');
-        const originalHTML = label.innerHTML;
-        label.innerHTML = '<i class="fas fa-circle-notch fa-spin text-indigo-600"></i> Uploading...';
-        label.style.pointerEvents = 'none';
-
-        fetch('ajax/update_profile.php?t=' + Date.now(), {
-            method: 'POST',
-            body: formData
-        })
-        .then(response => response.json())
-        .then(result => {
-            if (result.success) {
-                alert('Resume uploaded successfully!');
-                location.reload();
-            } else {
-                alert(result.message || 'Upload failed');
-                label.innerHTML = originalHTML;
-                label.style.pointerEvents = 'auto';
-            }
-        })
-        .catch(err => {
-            console.error(err);
-            alert('Upload failed');
-            label.innerHTML = originalHTML;
-            label.style.pointerEvents = 'auto';
-        });
-    }
-}
 
 function uploadAvatar(input) {
     if (input.files && input.files[0]) {

@@ -70,43 +70,6 @@ try {
         exit;
     }
 
-    // 1.5. Handle Resume Upload
-    if (isset($_FILES['resume'])) {
-        $file = $_FILES['resume'];
-        $allowed = ['pdf', 'doc', 'docx'];
-        $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
-
-        if (!in_array($ext, $allowed)) {
-            echo json_encode(['success' => false, 'message' => 'Invalid file type. Only PDF, DOC, and DOCX are allowed.']);
-            exit;
-        }
-
-        if ($file['size'] > 5 * 1024 * 1024) {
-            echo json_encode(['success' => false, 'message' => 'File too large (max 5MB).']);
-            exit;
-        }
-
-        $upload_dir = '../assets/documents/resumes/';
-        if (!is_dir($upload_dir)) {
-            mkdir($upload_dir, 0777, true);
-        }
-
-        $filename = 'resume_' . $user_id . '_' . time() . '.' . $ext;
-        $target = $upload_dir . $filename;
-        $db_path = 'assets/documents/resumes/' . $filename;
-
-        if (move_uploaded_file($file['tmp_name'], $target)) {
-            if ($role === 'fundi') {
-                $stmt = $pdo->prepare("UPDATE fundi_profiles SET resume_url = ? WHERE user_id = ?");
-                $stmt->execute([$db_path, $user_id]);
-            }
-            echo json_encode(['success' => true, 'message' => 'Resume updated successfully!', 'path' => $db_path]);
-        } else {
-            echo json_encode(['success' => false, 'message' => 'Failed to move uploaded file.']);
-        }
-        exit;
-    }
-
     // 2. Handle Text Profile Updates
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $first_name = filter_input(INPUT_POST, 'first_name', FILTER_SANITIZE_SPECIAL_CHARS);
