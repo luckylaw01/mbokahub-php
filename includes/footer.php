@@ -4,10 +4,10 @@
             <a href="index.php" class="w-14 h-14 <?php echo basename($_SERVER['PHP_SELF']) === 'index.php' ? 'bg-white text-emerald-600' : 'text-slate-400'; ?> rounded-full flex items-center justify-center shadow-lg transition-transform active:scale-90">
                 <i class="fas fa-home text-lg"></i>
             </a>
-            <button onclick="document.querySelector('input[type=\'text\']').focus(); window.scrollTo({top: 0, behavior: 'smooth'});" 
-                    class="w-14 h-14 text-slate-400 flex items-center justify-center transition-transform active:scale-95">
+            <a href="search.php" 
+               class="w-14 h-14 <?php echo basename($_SERVER['PHP_SELF']) === 'search.php' ? 'bg-white text-emerald-600' : 'text-slate-400'; ?> rounded-full flex items-center justify-center shadow-lg transition-transform active:scale-95">
                 <i class="fas fa-search text-lg"></i>
-            </button>
+            </a>
             <button onclick="switchView('work')" 
                     class="w-14 h-14 text-slate-400 flex items-center justify-center transition-transform active:scale-95">
                 <i class="fas fa-briefcase text-lg"></i>

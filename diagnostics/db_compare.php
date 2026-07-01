@@ -27,6 +27,23 @@ $expected_schema = [
         ],
         'foreign_keys' => []
     ],
+    'achievements' => [
+        'columns' => [
+            'id' => ['type' => 'int(11)', 'nullable' => 'NO', 'extra' => 'auto_increment'],
+            'user_id' => ['type' => 'int(11)', 'nullable' => 'NO', 'extra' => ''],
+            'title' => ['type' => 'varchar(255)', 'nullable' => 'NO', 'extra' => ''],
+            'description' => ['type' => 'text', 'nullable' => 'YES', 'extra' => ''],
+            'date_awarded' => ['type' => 'date', 'nullable' => 'YES', 'extra' => ''],
+            'created_at' => ['type' => 'timestamp', 'nullable' => 'NO', 'extra' => '']
+        ],
+        'indexes' => [
+            'PRIMARY' => ['id'],
+            'fk_achievement_user' => ['user_id']
+        ],
+        'foreign_keys' => [
+            'fk_achievement_user' => ['column' => 'user_id', 'ref_table' => 'users', 'ref_column' => 'id']
+        ]
+    ],
     'certifications' => [
         'columns' => [
             'id' => ['type' => 'int(11)', 'nullable' => 'NO', 'extra' => 'auto_increment'],
@@ -46,6 +63,24 @@ $expected_schema = [
             'certifications_ibfk_1' => ['column' => 'user_id', 'ref_table' => 'users', 'ref_column' => 'id']
         ]
     ],
+    'character_references' => [
+        'columns' => [
+            'id' => ['type' => 'int(11)', 'nullable' => 'NO', 'extra' => 'auto_increment'],
+            'user_id' => ['type' => 'int(11)', 'nullable' => 'NO', 'extra' => ''],
+            'name' => ['type' => 'varchar(255)', 'nullable' => 'NO', 'extra' => ''],
+            'organization' => ['type' => 'varchar(255)', 'nullable' => 'YES', 'extra' => ''],
+            'relationship' => ['type' => 'varchar(255)', 'nullable' => 'YES', 'extra' => ''],
+            'contact_info' => ['type' => 'varchar(255)', 'nullable' => 'NO', 'extra' => ''],
+            'created_at' => ['type' => 'timestamp', 'nullable' => 'NO', 'extra' => '']
+        ],
+        'indexes' => [
+            'PRIMARY' => ['id'],
+            'fk_reference_user' => ['user_id']
+        ],
+        'foreign_keys' => [
+            'fk_reference_user' => ['column' => 'user_id', 'ref_table' => 'users', 'ref_column' => 'id']
+        ]
+    ],
     'contractor_profiles' => [
         'columns' => [
             'user_id' => ['type' => 'int(11)', 'nullable' => 'NO', 'extra' => ''],
@@ -60,6 +95,25 @@ $expected_schema = [
         ],
         'foreign_keys' => [
             'fk_contractor_user' => ['column' => 'user_id', 'ref_table' => 'users', 'ref_column' => 'id']
+        ]
+    ],
+    'education' => [
+        'columns' => [
+            'id' => ['type' => 'int(11)', 'nullable' => 'NO', 'extra' => 'auto_increment'],
+            'user_id' => ['type' => 'int(11)', 'nullable' => 'NO', 'extra' => ''],
+            'institution' => ['type' => 'varchar(255)', 'nullable' => 'NO', 'extra' => ''],
+            'credential' => ['type' => 'varchar(255)', 'nullable' => 'NO', 'extra' => ''],
+            'start_date' => ['type' => 'date', 'nullable' => 'NO', 'extra' => ''],
+            'end_date' => ['type' => 'date', 'nullable' => 'YES', 'extra' => ''],
+            'description' => ['type' => 'text', 'nullable' => 'YES', 'extra' => ''],
+            'created_at' => ['type' => 'timestamp', 'nullable' => 'NO', 'extra' => '']
+        ],
+        'indexes' => [
+            'PRIMARY' => ['id'],
+            'fk_education_user' => ['user_id']
+        ],
+        'foreign_keys' => [
+            'fk_education_user' => ['column' => 'user_id', 'ref_table' => 'users', 'ref_column' => 'id']
         ]
     ],
     'experiences' => [
@@ -94,7 +148,8 @@ $expected_schema = [
             'is_verified' => ['type' => 'tinyint(1)', 'nullable' => 'YES', 'extra' => ''],
             'rating' => ['type' => 'decimal(3,2)', 'nullable' => 'YES', 'extra' => ''],
             'review_count' => ['type' => 'int(11)', 'nullable' => 'YES', 'extra' => ''],
-            'resume_url' => ['type' => 'varchar(255)', 'nullable' => 'YES', 'extra' => '']
+            'resume_url' => ['type' => 'varchar(255)', 'nullable' => 'YES', 'extra' => ''],
+            'skills' => ['type' => 'text', 'nullable' => 'YES', 'extra' => '']
         ],
         'indexes' => [
             'PRIMARY' => ['user_id'],

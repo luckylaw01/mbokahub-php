@@ -49,7 +49,8 @@ try {
             "avatar" => $full_profile["avatar_url"] ?? null,
             "tvet_level" => $full_profile["tvet_level"] ?? "student",
             "is_verified" => $full_profile["is_verified"] ?? 0,
-            "resume_url" => $full_profile["resume_url"] ?? null
+            "resume_url" => $full_profile["resume_url"] ?? null,
+            "skills" => $full_profile["skills"] ?? ""
         ];
     } elseif ($role === "contractor") {
         $stmt = $pdo->prepare("
@@ -71,7 +72,8 @@ try {
             "location" => "Kenya",
             "bio" => $full_profile["business_description"] ?? "",
             "avatar" => null,
-            "is_verified" => 0
+            "is_verified" => 0,
+            "skills" => ""
         ];
     } else {
         $stmt = $pdo->prepare("SELECT * FROM users WHERE id = ?");
@@ -86,7 +88,8 @@ try {
             "location" => "Nairobi",
             "bio" => "",
             "avatar" => null,
-            "is_verified" => 0
+            "is_verified" => 0,
+            "skills" => ""
         ];
 
         // Phase 3: Fetch active jobs for hirers
@@ -110,6 +113,9 @@ $portfolio_items = [];
 $experiences = [];
 $certifications = [];
 $gigs = [];
+$education = [];
+$references = [];
+$achievements = [];
 
 if ($role === "fundi") {
     try {
@@ -139,6 +145,18 @@ if ($role === "fundi") {
         $stmt = $pdo->prepare("SELECT * FROM gigs WHERE user_id = ? ORDER BY created_at DESC");
         $stmt->execute([$user_id]);
         $gigs = $stmt->fetchAll();
+
+        $stmt = $pdo->prepare("SELECT * FROM education WHERE user_id = ? ORDER BY start_date DESC");
+        $stmt->execute([$user_id]);
+        $education = $stmt->fetchAll();
+
+        $stmt = $pdo->prepare("SELECT * FROM character_references WHERE user_id = ? ORDER BY created_at DESC");
+        $stmt->execute([$user_id]);
+        $references = $stmt->fetchAll();
+
+        $stmt = $pdo->prepare("SELECT * FROM achievements WHERE user_id = ? ORDER BY date_awarded DESC, created_at DESC");
+        $stmt->execute([$user_id]);
+        $achievements = $stmt->fetchAll();
     } catch (PDOException $e) {
         // Silently fail or log
     }
@@ -282,6 +300,11 @@ include "includes/header.php";
                             <input type="text" name="location" value="<?php echo htmlspecialchars($profile["location"]); ?>" class="w-full bg-slate-50 border-2 border-transparent focus:border-emerald-500/20 rounded-2xl p-4 text-sm font-bold outline-none transition-all">
                         </div>
 
+                        <div class="space-y-2">
+                            <label class="block text-[10px] font-black uppercase text-slate-400 ml-2">Phone Number</label>
+                            <input type="text" name="phone" value="<?php echo htmlspecialchars($full_profile["phone"] ?? ""); ?>" placeholder="e.g. +254 712 345 678" class="w-full bg-slate-50 border-2 border-transparent focus:border-emerald-500/20 rounded-2xl p-4 text-sm font-bold outline-none transition-all">
+                        </div>
+
                         <?php if ($role === "fundi"): ?>
                         <div class="space-y-2">
                             <label class="block text-[10px] font-black uppercase text-slate-400 ml-2">Category / Specialization</label>
@@ -304,6 +327,10 @@ include "includes/header.php";
                                 <option value="Level 3" <?php echo ($full_profile['tvet_level'] == 'Level 3') ? 'selected' : ''; ?>>TVET Level 3 (Diploma)</option>
                                 <option value="Level 4" <?php echo ($full_profile['tvet_level'] == 'Level 4') ? 'selected' : ''; ?>>TVET Level 4 (Technical Diploma)</option>
                             </select>
+                        </div>
+                        <div class="space-y-2">
+                            <label class="block text-[10px] font-black uppercase text-slate-400 ml-2">Skills (Comma-separated)</label>
+                            <input type="text" name="skills" value="<?php echo htmlspecialchars($profile["skills"]); ?>" placeholder="e.g. Plumbing, Leak Detection, Pipe Threading" class="w-full bg-slate-50 border-2 border-transparent focus:border-emerald-500/20 rounded-2xl p-4 text-sm font-bold outline-none transition-all">
                         </div>
                         <?php endif; ?>
 
@@ -423,6 +450,72 @@ include "includes/header.php";
                         <?php endif; ?>
                     </div>
                 </section>
+
+                <!-- Education Section -->
+                <section>
+                    <div class="flex items-center justify-between mb-6 px-2">
+                        <h3 class="text-2xl font-black text-slate-900">Education</h3>
+                        <button onclick="openAddEducation()" class="w-10 h-10 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center hover:bg-indigo-500 hover:text-white transition-all shadow-lg active:scale-95">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                    </div>
+
+                    <div class="space-y-4">
+                        <?php if (empty($education)): ?>
+                        <div class="text-center p-8 bg-slate-50 rounded-[2rem] border-2 border-dashed border-slate-100">
+                             <p class="text-[10px] font-black uppercase text-slate-300">No education listings added yet</p>
+                        </div>
+                        <?php else: ?>
+                            <?php foreach ($education as $edu): ?>
+                            <div class="bg-white p-6 rounded-[2rem] border border-slate-50 shadow-sm flex items-start gap-4">
+                                <div class="w-12 h-12 bg-slate-100 rounded-2xl flex items-center justify-center text-indigo-500 shrink-0">
+                                    <i class="fas fa-graduation-cap"></i>
+                                </div>
+                                <div class="flex-1">
+                                    <h4 class="font-black text-slate-900"><?php echo htmlspecialchars($edu["credential"]); ?></h4>
+                                    <p class="text-xs font-bold text-slate-500 mb-2"><?php echo htmlspecialchars($edu["institution"]); ?> • <?php echo date("M Y", strtotime($edu["start_date"])); ?> - <?php echo $edu["end_date"] ? date("M Y", strtotime($edu["end_date"])) : "Present"; ?></p>
+                                    <?php if ($edu["description"]): ?>
+                                    <p class="text-xs text-slate-400 leading-relaxed"><?php echo htmlspecialchars($edu["description"]); ?></p>
+                                    <?php endif; ?>
+                                </div>
+                            </div>
+                            <?php endforeach; ?>
+                        <?php endif; ?>
+                    </div>
+                </section>
+
+                <!-- Achievements Section -->
+                <section>
+                    <div class="flex items-center justify-between mb-6 px-2">
+                        <h3 class="text-2xl font-black text-slate-900">Achievements</h3>
+                        <button onclick="openAddAchievement()" class="w-10 h-10 bg-amber-50 text-amber-600 rounded-2xl flex items-center justify-center hover:bg-amber-500 hover:text-white transition-all shadow-lg active:scale-95">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                    </div>
+
+                    <div class="space-y-4">
+                        <?php if (empty($achievements)): ?>
+                        <div class="text-center p-8 bg-slate-50 rounded-[2rem] border-2 border-dashed border-slate-100">
+                             <p class="text-[10px] font-black uppercase text-slate-300">No achievements listed yet</p>
+                        </div>
+                        <?php else: ?>
+                            <?php foreach ($achievements as $ach): ?>
+                            <div class="bg-white p-6 rounded-[2rem] border border-slate-50 shadow-sm flex items-start gap-4">
+                                <div class="w-12 h-12 bg-slate-100 rounded-2xl flex items-center justify-center text-amber-500 shrink-0">
+                                    <i class="fas fa-trophy"></i>
+                                </div>
+                                <div class="flex-1">
+                                    <h4 class="font-black text-slate-900"><?php echo htmlspecialchars($ach["title"]); ?></h4>
+                                    <?php if ($ach["date_awarded"]): ?>
+                                    <p class="text-xs font-bold text-slate-400 mb-2">Awarded: <?php echo date("M Y", strtotime($ach["date_awarded"])); ?></p>
+                                    <?php endif; ?>
+                                    <p class="text-xs text-slate-500 leading-relaxed"><?php echo htmlspecialchars($ach["description"]); ?></p>
+                                </div>
+                            </div>
+                            <?php endforeach; ?>
+                        <?php endif; ?>
+                    </div>
+                </section>
             </div>
 
             <!-- Right Side: Certs & Skills -->
@@ -481,6 +574,62 @@ include "includes/header.php";
                             </div>
                         </div>
                         <?php endforeach; ?>
+                    </div>
+                </section>
+
+                <!-- Skills Section -->
+                <?php if ($role === "fundi" && !empty($profile["skills"])): ?>
+                <section>
+                    <div class="flex items-center justify-between mb-6 px-2">
+                        <h3 class="text-2xl font-black text-slate-900">Skills</h3>
+                    </div>
+                    <div class="bg-white p-6 rounded-[2.5rem] border border-slate-100 shadow-sm flex flex-wrap gap-2">
+                        <?php 
+                        $skills_arr = array_map('trim', explode(',', $profile["skills"]));
+                        foreach ($skills_arr as $skill): 
+                            if (!empty($skill)):
+                        ?>
+                            <span class="bg-emerald-50 text-emerald-700 border border-emerald-100/60 px-3.5 py-2 rounded-xl text-xs font-bold"><?php echo htmlspecialchars($skill); ?></span>
+                        <?php 
+                            endif;
+                        endforeach; 
+                        ?>
+                    </div>
+                </section>
+                <?php endif; ?>
+
+                <!-- Character References Section -->
+                <section>
+                    <div class="flex items-center justify-between mb-6 px-2">
+                        <h3 class="text-2xl font-black text-slate-900">References</h3>
+                        <button onclick="openAddReference()" class="w-10 h-10 bg-slate-50 text-slate-600 rounded-2xl flex items-center justify-center hover:bg-slate-900 hover:text-white transition-all shadow-lg active:scale-95">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                    </div>
+
+                    <div class="space-y-4">
+                        <?php if (empty($references)): ?>
+                        <div class="text-center p-8 bg-slate-50 rounded-[2rem] border-2 border-dashed border-slate-100">
+                             <p class="text-[10px] font-black uppercase text-slate-300">No references listed yet</p>
+                        </div>
+                        <?php else: ?>
+                            <?php foreach ($references as $ref): ?>
+                            <div class="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm relative overflow-hidden group">
+                                <div class="absolute -right-4 -top-4 w-12 h-12 bg-slate-100 rounded-full group-hover:scale-150 transition-all"></div>
+                                <h4 class="font-black text-slate-900 text-sm mb-1"><?php echo htmlspecialchars($ref["name"]); ?></h4>
+                                <p class="text-[10px] font-black text-emerald-600 uppercase tracking-widest mb-1">
+                                    <?php echo htmlspecialchars($ref["organization"] ?: 'N/A'); ?> 
+                                    <?php if ($ref["relationship"]): ?>
+                                        • <?php echo htmlspecialchars($ref["relationship"]); ?>
+                                    <?php endif; ?>
+                                </p>
+                                <p class="text-xs text-slate-500 flex items-center gap-1.5 mt-3">
+                                    <i class="fas fa-phone text-slate-300"></i>
+                                    <?php echo htmlspecialchars($ref["contact_info"]); ?>
+                                </p>
+                            </div>
+                            <?php endforeach; ?>
+                        <?php endif; ?>
                     </div>
                 </section>
             </div>
@@ -642,6 +791,9 @@ function openAddPortfolio() { openPortfolioModal('add_portfolio', 'Add Project')
 function openAddExperience() { openPortfolioModal('add_experience', 'Add Experience'); }
 function openAddCert() { openPortfolioModal('add_cert', 'Add Certification'); }
 function openAddGig() { openPortfolioModal('add_gig', 'Create Quick Gig'); }
+function openAddEducation() { openPortfolioModal('add_education', 'Add Education Detail'); }
+function openAddReference() { openPortfolioModal('add_reference', 'Add Character Reference'); }
+function openAddAchievement() { openPortfolioModal('add_achievement', 'Add Achievement'); }
 
 function uploadAvatar(input) {
     if (input.files && input.files[0]) {
@@ -774,6 +926,56 @@ function openPortfolioModal(action, title) {
             <div class="space-y-2">
                 <label class="block text-[10px] font-black uppercase text-slate-400 ml-2">Quick Description</label>
                 <textarea name="description" placeholder="Short summary of what you offer..." class="w-full bg-slate-50 border-2 border-transparent focus:border-emerald-500/20 rounded-2xl p-4 text-sm font-bold outline-none"></textarea>
+            </div>
+        `;
+    } else if (action === 'add_education') {
+        titleLabel.innerText = 'Institution / School';
+        fields.innerHTML = `
+            <div class="space-y-2">
+                <label class="block text-[10px] font-black uppercase text-slate-400 ml-2">Degree / Certificate / Course</label>
+                <input type="text" name="credential" required placeholder="e.g. Grade III Plumber Certificate" class="w-full bg-slate-50 border-2 border-transparent focus:border-emerald-500/20 rounded-2xl p-4 text-sm font-bold outline-none">
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+                <div class="space-y-2">
+                    <label class="block text-[10px] font-black uppercase text-slate-400 ml-2">Start Date</label>
+                    <input type="date" name="start_date" required class="w-full bg-slate-50 border-2 border-transparent focus:border-emerald-500/20 rounded-2xl p-4 text-sm font-bold outline-none">
+                </div>
+                <div class="space-y-2">
+                    <label class="block text-[10px] font-black uppercase text-slate-400 ml-2">End Date (Optional)</label>
+                    <input type="date" name="end_date" class="w-full bg-slate-50 border-2 border-transparent focus:border-emerald-500/20 rounded-2xl p-4 text-sm font-bold outline-none">
+                </div>
+            </div>
+            <div class="space-y-2">
+                <label class="block text-[10px] font-black uppercase text-slate-400 ml-2">Description / Achievements</label>
+                <textarea name="description" placeholder="Any details..." class="w-full bg-slate-50 border-2 border-transparent focus:border-emerald-500/20 rounded-2xl p-4 text-sm font-bold outline-none"></textarea>
+            </div>
+        `;
+    } else if (action === 'add_reference') {
+        titleLabel.innerText = 'Reference Name';
+        fields.innerHTML = `
+            <div class="space-y-2">
+                <label class="block text-[10px] font-black uppercase text-slate-400 ml-2">Organization / Company</label>
+                <input type="text" name="organization" placeholder="e.g. Kenya Power" class="w-full bg-slate-50 border-2 border-transparent focus:border-emerald-500/20 rounded-2xl p-4 text-sm font-bold outline-none">
+            </div>
+            <div class="space-y-2">
+                <label class="block text-[10px] font-black uppercase text-slate-400 ml-2">Relationship</label>
+                <input type="text" name="relationship" placeholder="e.g. Former Supervisor" class="w-full bg-slate-50 border-2 border-transparent focus:border-emerald-500/20 rounded-2xl p-4 text-sm font-bold outline-none">
+            </div>
+            <div class="space-y-2">
+                <label class="block text-[10px] font-black uppercase text-slate-400 ml-2">Contact Details (Phone / Email)</label>
+                <input type="text" name="contact_info" required placeholder="e.g. +254 712345678 or ref@mail.com" class="w-full bg-slate-50 border-2 border-transparent focus:border-emerald-500/20 rounded-2xl p-4 text-sm font-bold outline-none">
+            </div>
+        `;
+    } else if (action === 'add_achievement') {
+        titleLabel.innerText = 'Achievement Title';
+        fields.innerHTML = `
+            <div class="space-y-2">
+                <label class="block text-[10px] font-black uppercase text-slate-400 ml-2">Date Awarded / Achieved</label>
+                <input type="date" name="date_awarded" class="w-full bg-slate-50 border-2 border-transparent focus:border-emerald-500/20 rounded-2xl p-4 text-sm font-bold outline-none">
+            </div>
+            <div class="space-y-2">
+                <label class="block text-[10px] font-black uppercase text-slate-400 ml-2">Description</label>
+                <textarea name="description" placeholder="Briefly describe what was accomplished..." class="w-full bg-slate-50 border-2 border-transparent focus:border-emerald-500/20 rounded-2xl p-4 text-sm font-bold outline-none"></textarea>
             </div>
         `;
     }

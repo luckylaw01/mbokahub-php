@@ -113,6 +113,39 @@ try {
             echo json_encode(['success' => true]);
             break;
 
+        case 'add_education':
+            $institution = filter_input(INPUT_POST, 'title', FILTER_SANITIZE_SPECIAL_CHARS);
+            $credential = filter_input(INPUT_POST, 'credential', FILTER_SANITIZE_SPECIAL_CHARS);
+            $start_date = filter_input(INPUT_POST, 'start_date', FILTER_SANITIZE_SPECIAL_CHARS);
+            $end_date = filter_input(INPUT_POST, 'end_date', FILTER_SANITIZE_SPECIAL_CHARS) ?: null;
+            $description = filter_input(INPUT_POST, 'description', FILTER_SANITIZE_SPECIAL_CHARS);
+
+            $stmt = $pdo->prepare("INSERT INTO education (user_id, institution, credential, start_date, end_date, description) VALUES (?, ?, ?, ?, ?, ?)");
+            $stmt->execute([$user_id, $institution, $credential, $start_date, $end_date, $description]);
+            echo json_encode(['success' => true]);
+            break;
+
+        case 'add_reference':
+            $name = filter_input(INPUT_POST, 'title', FILTER_SANITIZE_SPECIAL_CHARS);
+            $organization = filter_input(INPUT_POST, 'organization', FILTER_SANITIZE_SPECIAL_CHARS) ?: null;
+            $relationship = filter_input(INPUT_POST, 'relationship', FILTER_SANITIZE_SPECIAL_CHARS) ?: null;
+            $contact_info = filter_input(INPUT_POST, 'contact_info', FILTER_SANITIZE_SPECIAL_CHARS);
+
+            $stmt = $pdo->prepare("INSERT INTO character_references (user_id, name, organization, relationship, contact_info) VALUES (?, ?, ?, ?, ?)");
+            $stmt->execute([$user_id, $name, $organization, $relationship, $contact_info]);
+            echo json_encode(['success' => true]);
+            break;
+
+        case 'add_achievement':
+            $title = filter_input(INPUT_POST, 'title', FILTER_SANITIZE_SPECIAL_CHARS);
+            $description = filter_input(INPUT_POST, 'description', FILTER_SANITIZE_SPECIAL_CHARS);
+            $date_awarded = filter_input(INPUT_POST, 'date_awarded', FILTER_SANITIZE_SPECIAL_CHARS) ?: null;
+
+            $stmt = $pdo->prepare("INSERT INTO achievements (user_id, title, description, date_awarded) VALUES (?, ?, ?, ?)");
+            $stmt->execute([$user_id, $title, $description, $date_awarded]);
+            echo json_encode(['success' => true]);
+            break;
+
         default:
             echo json_encode(['success' => false, 'message' => 'Invalid action.']);
     }

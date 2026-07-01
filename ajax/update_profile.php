@@ -78,21 +78,23 @@ try {
         $bio = filter_input(INPUT_POST, 'bio', FILTER_SANITIZE_SPECIAL_CHARS);
         $category_id = filter_input(INPUT_POST, 'category_id', FILTER_SANITIZE_NUMBER_INT);
         $tvet_level = filter_input(INPUT_POST, 'tvet_level', FILTER_SANITIZE_SPECIAL_CHARS);
+        $skills = filter_input(INPUT_POST, 'skills', FILTER_SANITIZE_SPECIAL_CHARS);
+        $phone = filter_input(INPUT_POST, 'phone', FILTER_SANITIZE_SPECIAL_CHARS);
 
         // Start transaction
         $pdo->beginTransaction();
 
         // Update basic user info
-        $stmt1 = $pdo->prepare("UPDATE users SET first_name = ?, last_name = ? WHERE id = ?");
-        $stmt1->execute([$first_name, $last_name, $user_id]);
+        $stmt1 = $pdo->prepare("UPDATE users SET first_name = ?, last_name = ?, phone = ? WHERE id = ?");
+        $stmt1->execute([$first_name, $last_name, $phone, $user_id]);
         
         // Update session name
         $_SESSION['name'] = $first_name . ' ' . $last_name;
 
         // Update fundi specific info
         if ($role === 'fundi') {
-            $stmt2 = $pdo->prepare("UPDATE fundi_profiles SET location = ?, bio = ?, category_id = ?, tvet_level = ? WHERE user_id = ?");
-            $stmt2->execute([$location, $bio, $category_id ?: null, $tvet_level, $user_id]);
+            $stmt2 = $pdo->prepare("UPDATE fundi_profiles SET location = ?, bio = ?, category_id = ?, tvet_level = ?, skills = ? WHERE user_id = ?");
+            $stmt2->execute([$location, $bio, $category_id ?: null, $tvet_level, $skills, $user_id]);
         }
 
         $pdo->commit();

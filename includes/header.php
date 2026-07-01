@@ -54,7 +54,7 @@ $user_name = $_SESSION['name'] ?? '';
             <!-- Center: Nav Pills -->
             <nav class="hidden md:flex bg-slate-200/50 p-1.5 rounded-[1.5rem] items-center gap-1">
                 <a href="index.php" class="px-6 py-2 <?php echo basename($_SERVER['PHP_SELF']) === 'index.php' ? 'bg-white shadow-sm text-emerald-600 font-semibold' : 'text-slate-500 hover:text-slate-900 font-medium'; ?> rounded-full transition-all"><?php echo $t['nav_home'] ?? 'Home'; ?></a>
-                <a href="#" class="px-6 py-2 text-slate-500 hover:text-slate-900 font-medium transition-colors"><?php echo $t['nav_search'] ?? 'Search'; ?></a>
+                <a href="search.php" class="px-6 py-2 <?php echo basename($_SERVER['PHP_SELF']) === 'search.php' ? 'bg-white shadow-sm text-emerald-600 font-semibold' : 'text-slate-500 hover:text-slate-900 font-medium'; ?> rounded-full transition-all"><?php echo $t['nav_search'] ?? 'Search'; ?></a>
                 <a href="jobs.php" class="px-6 py-2 <?php echo basename($_SERVER['PHP_SELF']) === 'jobs.php' ? 'bg-white shadow-sm text-emerald-600 font-semibold' : 'text-slate-500 hover:text-slate-900 font-medium'; ?> rounded-full transition-all">Jobs</a>
                 <a href="profile.php" class="px-6 py-2 <?php echo basename($_SERVER['PHP_SELF']) === 'profile.php' ? 'bg-white shadow-sm text-emerald-600 font-semibold' : 'text-slate-500 hover:text-slate-900 font-medium'; ?> rounded-full transition-all"><?php echo $t['nav_profile'] ?? 'Profile'; ?></a>
             </nav>
