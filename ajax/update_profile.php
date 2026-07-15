@@ -77,7 +77,9 @@ try {
         $location = filter_input(INPUT_POST, 'location', FILTER_SANITIZE_SPECIAL_CHARS);
         $bio = filter_input(INPUT_POST, 'bio', FILTER_SANITIZE_SPECIAL_CHARS);
         $category_id = filter_input(INPUT_POST, 'category_id', FILTER_SANITIZE_NUMBER_INT);
-        $tvet_level = filter_input(INPUT_POST, 'tvet_level', FILTER_SANITIZE_SPECIAL_CHARS);
+        $tvet_level_raw = filter_input(INPUT_POST, 'tvet_level', FILTER_SANITIZE_SPECIAL_CHARS);
+        $valid_tvet_levels = ['None', 'Level 3', 'Level 4', 'Level 5', 'Level 6'];
+        $tvet_level = in_array($tvet_level_raw, $valid_tvet_levels) ? $tvet_level_raw : 'None';
         $skills = filter_input(INPUT_POST, 'skills', FILTER_SANITIZE_SPECIAL_CHARS);
         $phone = filter_input(INPUT_POST, 'phone', FILTER_SANITIZE_SPECIAL_CHARS);
 

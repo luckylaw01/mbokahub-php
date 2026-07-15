@@ -137,20 +137,22 @@ ob_start();
             font-size: 10px;
             font-weight: 500;
         }
-        .main-grid {
+        .main-container {
             width: 100%;
-            border-collapse: collapse;
+            position: relative;
         }
         .sidebar-col {
-            width: 32%;
-            vertical-align: top;
-            padding-right: 18px;
-            border-right: 1px solid #f1f5f9;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 30%;
+            padding-right: 15px;
         }
         .content-col {
-            width: 68%;
-            vertical-align: top;
-            padding-left: 20px;
+            margin-left: 32%;
+            padding-left: 15px;
+            border-left: 1px solid #f1f5f9;
+            min-height: 500px;
         }
         h2 {
             font-size: 11px;
@@ -326,161 +328,161 @@ ob_start();
     </table>
 
     <!-- Main Content Area -->
-    <table class="main-grid">
-        <tr>
-            <!-- Left Sidebar (1/3 Width) -->
-            <td class="sidebar-col">
-                
-                <!-- Skills -->
-                <?php if (!empty($skills)): ?>
-                <div class="section">
-                    <h2>Core Skills</h2>
-                    <div style="margin-top: 5px;">
-                        <?php 
-                        $skills_arr = array_map('trim', explode(',', $skills));
-                        foreach ($skills_arr as $skill): 
-                            if (!empty($skill)):
-                        ?>
-                            <span class="skill-tag"><?php echo htmlspecialchars($skill); ?></span>
-                        <?php 
-                            endif;
-                        endforeach; 
-                        ?>
+    <div class="main-container">
+        <!-- Left Sidebar (1/3 Width) -->
+        <div class="sidebar-col">
+            
+            <!-- Skills -->
+            <?php if (!empty($skills)): ?>
+            <div class="section">
+                <h2>Core Skills</h2>
+                <div style="margin-top: 5px;">
+                    <?php 
+                    $skills_arr = array_map('trim', explode(',', $skills));
+                    foreach ($skills_arr as $skill): 
+                        if (!empty($skill)):
+                    ?>
+                        <span class="skill-tag"><?php echo htmlspecialchars($skill); ?></span>
+                    <?php 
+                        endif;
+                    endforeach; 
+                    ?>
+                </div>
+            </div>
+            <?php endif; ?>
+
+            <!-- Certifications -->
+            <?php if (!empty($certs)): ?>
+            <div class="section">
+                <h2>Certifications</h2>
+                <?php foreach ($certs as $cert): ?>
+                    <div class="cert-card">
+                        <div class="cert-title"><?php echo htmlspecialchars($cert['title']); ?></div>
+                        <div class="cert-inst"><?php echo htmlspecialchars($cert['institution']); ?></div>
+                        <div class="cert-date"><?php echo date("F Y", strtotime($cert['issue_date'])); ?></div>
                     </div>
-                </div>
-                <?php endif; ?>
+                <?php endforeach; ?>
+            </div>
+            <?php endif; ?>
 
-                <!-- Certifications -->
-                <?php if (!empty($certs)): ?>
-                <div class="section">
-                    <h2>Certifications</h2>
-                    <?php foreach ($certs as $cert): ?>
-                        <div class="cert-card">
-                            <div class="cert-title"><?php echo htmlspecialchars($cert['title']); ?></div>
-                            <div class="cert-inst"><?php echo htmlspecialchars($cert['institution']); ?></div>
-                            <div class="cert-date"><?php echo date("F Y", strtotime($cert['issue_date'])); ?></div>
+            <!-- References -->
+            <?php if (!empty($references)): ?>
+            <div class="section">
+                <h2>References</h2>
+                <?php foreach ($references as $ref): ?>
+                    <div class="ref-card">
+                        <div class="ref-name"><?php echo htmlspecialchars($ref['name']); ?></div>
+                        <div class="ref-org">
+                            <?php echo htmlspecialchars($ref['organization'] ?: 'Independent'); ?>
+                            <?php if ($ref['relationship']): ?>
+                                (<?php echo htmlspecialchars($ref['relationship']); ?>)
+                            <?php endif; ?>
                         </div>
-                    <?php endforeach; ?>
-                </div>
-                <?php endif; ?>
+                        <div class="ref-phone"><?php echo htmlspecialchars($ref['contact_info']); ?></div>
+                    </div>
+                <?php endforeach; ?>
+            </div>
+            <?php endif; ?>
 
-                <!-- References -->
-                <?php if (!empty($references)): ?>
-                <div class="section">
-                    <h2>References</h2>
-                    <?php foreach ($references as $ref): ?>
-                        <div class="ref-card">
-                            <div class="ref-name"><?php echo htmlspecialchars($ref['name']); ?></div>
-                            <div class="ref-org">
-                                <?php echo htmlspecialchars($ref['organization'] ?: 'Independent'); ?>
-                                <?php if ($ref['relationship']): ?>
-                                    (<?php echo htmlspecialchars($ref['relationship']); ?>)
-                                <?php endif; ?>
-                            </div>
-                            <div class="ref-phone">📞 <?php echo htmlspecialchars($ref['contact_info']); ?></div>
-                        </div>
-                    <?php endforeach; ?>
-                </div>
-                <?php endif; ?>
+        </div>
 
-            </td>
+        <!-- Right Content (2/3 Width) -->
+        <div class="content-col">
+            
+            <!-- Professional Summary -->
+            <div class="section">
+                <h2>Professional Summary</h2>
+                <div class="summary-text"><?php echo nl2br(htmlspecialchars($bio)); ?></div>
+            </div>
 
-            <!-- Right Content (2/3 Width) -->
-            <td class="content-col">
-                
-                <!-- Professional Summary -->
-                <div class="section">
-                    <h2>Professional Summary</h2>
-                    <div class="summary-text"><?php echo nl2br(htmlspecialchars($bio)); ?></div>
-                </div>
-
-                <!-- Experience -->
-                <div class="section">
-                    <h2>Work Experience</h2>
-                    <?php if (empty($experiences)): ?>
-                        <div style="color: #94a3b8; font-style: italic;">No work experience listed yet.</div>
-                    <?php else: ?>
-                        <?php foreach ($experiences as $exp): ?>
-                            <div class="timeline-item">
-                                <span class="timeline-date">
-                                    <?php echo date("M Y", strtotime($exp['start_date'])); ?> - <?php echo $exp['end_date'] ? date("M Y", strtotime($exp['end_date'])) : "Present"; ?>
-                                </span>
-                                <div class="timeline-title"><?php echo htmlspecialchars($exp['role']); ?></div>
-                                <div class="timeline-meta">
-                                    at <span class="timeline-company"><?php echo htmlspecialchars($exp['company']); ?></span>
-                                </div>
-                                <div class="timeline-desc"><?php echo nl2br(htmlspecialchars($exp['description'])); ?></div>
-                            </div>
-                        <?php endforeach; ?>
-                    <?php endif; ?>
-                </div>
-
-                <!-- Featured Projects -->
-                <div class="section">
-                    <h2>Featured Projects & Services</h2>
-                    <?php if (empty($gigs)): ?>
-                        <div style="color: #94a3b8; font-style: italic;">No featured services listed yet.</div>
-                    <?php else: ?>
-                        <?php foreach ($gigs as $gig): ?>
-                            <table class="project-table" style="border-collapse: collapse; margin-bottom: 8px;">
-                                <tr>
-                                    <td class="project-card">
-                                        <table style="width: 100%;">
-                                            <tr>
-                                                <td class="project-title"><?php echo htmlspecialchars($gig['title']); ?></td>
-                                                <td class="project-rate">KSh <?php echo number_format($gig['price_amount']); ?></td>
-                                            </tr>
-                                        </table>
-                                        <div class="project-desc"><?php echo htmlspecialchars($gig['description']); ?></div>
-                                    </td>
-                                </tr>
-                            </table>
-                        <?php endforeach; ?>
-                    <?php endif; ?>
-                </div>
-
-                <!-- Education -->
-                <div class="section">
-                    <h2>Education</h2>
-                    <?php if (empty($education)): ?>
-                        <div style="color: #94a3b8; font-style: italic;">No education details listed yet.</div>
-                    <?php else: ?>
-                        <?php foreach ($education as $edu): ?>
-                            <div class="timeline-item">
-                                <span class="timeline-date">
-                                    <?php echo date("M Y", strtotime($edu['start_date'])); ?> - <?php echo $edu['end_date'] ? date("M Y", strtotime($edu['end_date'])) : "Present"; ?>
-                                </span>
-                                <div class="timeline-title"><?php echo htmlspecialchars($edu['credential']); ?></div>
-                                <div class="timeline-meta">
-                                    at <span class="timeline-company"><?php echo htmlspecialchars($edu['institution']); ?></span>
-                                </div>
-                                <?php if ($edu['description']): ?>
-                                    <div class="timeline-desc"><?php echo nl2br(htmlspecialchars($edu['description'])); ?></div>
-                                <?php endif; ?>
-                            </div>
-                        <?php endforeach; ?>
-                    <?php endif; ?>
-                </div>
-
-                <!-- Achievements -->
-                <?php if (!empty($achievements)): ?>
-                <div class="section">
-                    <h2>Key Achievements</h2>
-                    <?php foreach ($achievements as $ach): ?>
-                        <div class="ach-card">
-                            <span class="timeline-date" style="font-size: 8px; font-weight: bold; color: #94a3b8; margin-top: 2px;">
-                                <?php echo $ach['date_awarded'] ? date("F Y", strtotime($ach['date_awarded'])) : ''; ?>
+            <!-- Experience -->
+            <div class="section">
+                <h2>Work Experience</h2>
+                <?php if (empty($experiences)): ?>
+                    <div style="color: #94a3b8; font-style: italic;">No work experience listed yet.</div>
+                <?php else: ?>
+                    <?php foreach ($experiences as $exp): ?>
+                        <div class="timeline-item">
+                            <span class="timeline-date" style="display:block; font-size: 8px; font-weight: bold; color: #94a3b8; margin-bottom: 2px;">
+                                <?php echo date("M Y", strtotime($exp['start_date'])); ?> - <?php echo $exp['end_date'] ? date("M Y", strtotime($exp['end_date'])) : "Present"; ?>
                             </span>
-                            <div class="ach-title">🏆 <?php echo htmlspecialchars($ach['title']); ?></div>
-                            <div class="ach-desc"><?php echo nl2br(htmlspecialchars($ach['description'])); ?></div>
+                            <div class="timeline-title"><?php echo htmlspecialchars($exp['role']); ?></div>
+                            <div class="timeline-meta">
+                                at <span class="timeline-company"><?php echo htmlspecialchars($exp['company']); ?></span>
+                            </div>
+                            <div class="timeline-desc"><?php echo nl2br(htmlspecialchars($exp['description'])); ?></div>
                         </div>
                     <?php endforeach; ?>
-                </div>
                 <?php endif; ?>
+            </div>
 
-            </td>
-        </tr>
-    </table>
+            <!-- Featured Projects -->
+            <div class="section">
+                <h2>Featured Projects & Services</h2>
+                <?php if (empty($gigs)): ?>
+                    <div style="color: #94a3b8; font-style: italic;">No featured services listed yet.</div>
+                <?php else: ?>
+                    <?php foreach ($gigs as $gig): ?>
+                        <table class="project-table" style="border-collapse: collapse; margin-bottom: 8px;">
+                            <tr>
+                                <td class="project-card">
+                                    <table style="width: 100%;">
+                                        <tr>
+                                            <td class="project-title"><?php echo htmlspecialchars($gig['title']); ?></td>
+                                            <td class="project-rate">KSh <?php echo number_format($gig['price_amount']); ?></td>
+                                        </tr>
+                                    </table>
+                                    <div class="project-desc"><?php echo htmlspecialchars($gig['description']); ?></div>
+                                </td>
+                            </tr>
+                        </table>
+                    <?php endforeach; ?>
+                <?php endif; ?>
+            </div>
+
+            <!-- Education -->
+            <div class="section">
+                <h2>Education</h2>
+                <?php if (empty($education)): ?>
+                    <div style="color: #94a3b8; font-style: italic;">No education details listed yet.</div>
+                <?php else: ?>
+                    <?php foreach ($education as $edu): ?>
+                        <div class="timeline-item">
+                            <span class="timeline-date" style="display:block; font-size: 8px; font-weight: bold; color: #94a3b8; margin-bottom: 2px;">
+                                <?php echo date("M Y", strtotime($edu['start_date'])); ?> - <?php echo $edu['end_date'] ? date("M Y", strtotime($edu['end_date'])) : "Present"; ?>
+                            </span>
+                            <div class="timeline-title"><?php echo htmlspecialchars($edu['credential']); ?></div>
+                            <div class="timeline-meta">
+                                at <span class="timeline-company"><?php echo htmlspecialchars($edu['institution']); ?></span>
+                            </div>
+                            <?php if ($edu['description']): ?>
+                                <div class="timeline-desc"><?php echo nl2br(htmlspecialchars($edu['description'])); ?></div>
+                            <?php endif; ?>
+                        </div>
+                    <?php endforeach; ?>
+                <?php endif; ?>
+            </div>
+
+            <!-- Achievements -->
+            <?php if (!empty($achievements)): ?>
+            <div class="section">
+                <h2>Key Achievements</h2>
+                <?php foreach ($achievements as $ach): ?>
+                    <div class="ach-card">
+                        <span class="timeline-date" style="display:block; font-size: 8px; font-weight: bold; color: #94a3b8; margin-top: 2px; margin-bottom: 2px;">
+                            <?php echo $ach['date_awarded'] ? date("F Y", strtotime($ach['date_awarded'])) : ''; ?>
+                        </span>
+                        <div class="ach-title"><?php echo htmlspecialchars($ach['title']); ?></div>
+                        <div class="ach-desc"><?php echo nl2br(htmlspecialchars($ach['description'])); ?></div>
+                    </div>
+                <?php endforeach; ?>
+            </div>
+            <?php endif; ?>
+
+        </div>
+        
+        <div style="clear: both;"></div>
+    </div>
 
     <!-- Footer -->
     <div class="footer">

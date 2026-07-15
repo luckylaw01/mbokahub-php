@@ -33,8 +33,8 @@ try {
         $stmt->execute([$user_id]);
         $full_profile = $stmt->fetch();
 
-        // Phase 4: Fetch completed jobs count
-        $stmt_jobs = $pdo->prepare("SELECT COUNT(*) FROM jobs WHERE assigned_fundi_id = ? AND status = 'completed'");
+        // Count portfolio items (projects done / showcased work)
+        $stmt_jobs = $pdo->prepare("SELECT COUNT(*) FROM portfolio_items WHERE user_id = ?");
         $stmt_jobs->execute([$user_id]);
         $completed_count = $stmt_jobs->fetchColumn();
         
@@ -47,7 +47,7 @@ try {
             "location" => $full_profile["location"] ?? "Kenya",
             "bio" => $full_profile["bio"] ?? "",
             "avatar" => $full_profile["avatar_url"] ?? null,
-            "tvet_level" => $full_profile["tvet_level"] ?? "student",
+            "tvet_level" => $full_profile["tvet_level"] ?? "None",
             "is_verified" => $full_profile["is_verified"] ?? 0,
             "resume_url" => $full_profile["resume_url"] ?? null,
             "skills" => $full_profile["skills"] ?? ""
@@ -168,107 +168,130 @@ include "includes/header.php";
 ?>
 
 
-    <main class="max-w-5xl mx-auto p-4 md:p-8">
-        <!-- Profile Header Card -->
-        <div class="bg-white rounded-[2.5rem] p-8 md:p-12 shadow-2xl shadow-slate-200 border border-slate-50 relative overflow-hidden mb-8">
-            <div class="absolute top-0 right-0 w-64 h-64 vibrant-gradient opacity-10 blur-3xl -mr-32 -mt-32"></div>
+    <main class="max-w-5xl mx-auto px-0 md:px-8 pt-0 pb-24 md:py-8">
+        <!-- Social Media Style Profile Header -->
+        <div class="bg-white md:rounded-[2.5rem] shadow-sm md:shadow-2xl md:shadow-slate-200 border-b md:border border-slate-50 relative overflow-hidden mb-6 md:mb-8">
+            <!-- Cover Photo Area -->
+            <div class="h-32 md:h-48 w-full vibrant-gradient relative">
+                <!-- Cover photo edit button (mock) -->
+                <button class="absolute top-4 right-4 w-8 h-8 md:w-10 md:h-10 bg-black/30 backdrop-blur-md text-white rounded-full flex items-center justify-center hover:bg-black/50 transition-all z-10">
+                    <i class="fas fa-camera text-xs md:text-sm"></i>
+                </button>
+            </div>
             
-            <div class="flex flex-col md:flex-row items-center gap-8 relative z-10">
-                <div class="relative group">
-                    <div class="w-32 h-32 md:w-40 md:h-40 rounded-[2.5rem] bg-slate-100 flex items-center justify-center text-4xl md:text-5xl font-black text-slate-300 border-4 border-white shadow-xl overflow-hidden">
-                        <?php if ($profile["avatar"]): ?>
-                            <img src="<?php echo htmlspecialchars($profile["avatar"]); ?>" alt="Avatar" class="w-full h-full object-cover">
-                        <?php else: ?>
-                            <?php echo substr($user_name, 0, 1); ?>
+            <div class="px-4 md:px-12 pb-6 md:pb-12 relative">
+                <div class="flex flex-col md:flex-row items-center md:items-end gap-4 md:gap-8 -mt-16 md:-mt-20 mb-4 md:mb-6">
+                    <!-- Avatar overlapping cover -->
+                    <div class="relative group shrink-0">
+                        <div class="w-32 h-32 md:w-40 md:h-40 rounded-full md:rounded-[2.5rem] bg-white flex items-center justify-center text-4xl md:text-5xl font-black text-slate-300 border-[6px] border-white shadow-lg overflow-hidden relative z-10">
+                            <?php if ($profile["avatar"]): ?>
+                                <img src="<?php echo htmlspecialchars($profile["avatar"]); ?>" alt="Avatar" class="w-full h-full object-cover">
+                            <?php else: ?>
+                                <div class="w-full h-full bg-slate-100 flex items-center justify-center text-slate-400 font-bold"><?php echo substr($user_name, 0, 1); ?></div>
+                            <?php endif; ?>
+                        </div>
+                        <?php if ($role === "fundi"): ?>
+                        <div class="absolute bottom-1 right-1 md:-bottom-2 md:-right-2 bg-emerald-500 text-white w-8 h-8 md:w-10 md:h-10 rounded-full md:rounded-2xl flex items-center justify-center border-4 border-white shadow-lg z-20">
+                            <i class="fas fa-check text-[10px] md:text-xs"></i>
+                        </div>
+                        <?php elseif ($role === "contractor"): ?>
+                        <div class="absolute bottom-1 right-1 md:-bottom-2 md:-right-2 bg-blue-500 text-white w-8 h-8 md:w-10 md:h-10 rounded-full md:rounded-2xl flex items-center justify-center border-4 border-white shadow-lg z-20">
+                            <i class="fas fa-shield-halved text-[10px] md:text-xs"></i>
+                        </div>
                         <?php endif; ?>
+                        <!-- Quick Upload Overlay -->
+                        <label for="avatar-input" class="absolute inset-0 bg-slate-900/60 opacity-0 group-hover:opacity-100 transition-all cursor-pointer flex items-center justify-center rounded-full md:rounded-[2.5rem] text-white z-30">
+                            <i class="fas fa-camera text-xl md:text-2xl"></i>
+                            <input type="file" id="avatar-input" class="hidden" accept="image/*" onchange="uploadAvatar(this)">
+                        </label>
                     </div>
-                    <?php if ($role === "fundi"): ?>
-                    <div class="absolute -bottom-2 -right-2 bg-emerald-500 text-white w-10 h-10 rounded-2xl flex items-center justify-center border-4 border-white shadow-lg">
-                        <i class="fas fa-check text-xs"></i>
-                    </div>
-                    <?php elseif ($role === "contractor"): ?>
-                    <div class="absolute -bottom-2 -right-2 bg-blue-500 text-white w-10 h-10 rounded-2xl flex items-center justify-center border-4 border-white shadow-lg">
-                        <i class="fas fa-shield-halved text-xs"></i>
-                    </div>
-                    <?php endif; ?>
 
-                    <!-- Quick Upload Overlay (Shown on Hover) -->
-                    <label for="avatar-input" class="absolute inset-0 bg-slate-900/60 opacity-0 group-hover:opacity-100 transition-all cursor-pointer flex items-center justify-center rounded-[2.5rem] text-white overflow-hidden">
-                        <i class="fas fa-camera text-2xl"></i>
-                        <input type="file" id="avatar-input" class="hidden" accept="image/*" onchange="uploadAvatar(this)">
-                    </label>
+                    <!-- Action Buttons (Next to avatar on desktop, below on mobile) -->
+                    <div class="flex-1 w-full flex flex-row flex-wrap justify-center md:justify-end gap-2 md:gap-3 mt-2 md:mt-0 relative z-10">
+                        <button onclick="openEditProfile()" class="flex-1 md:flex-none py-2.5 px-4 md:py-3 md:px-6 bg-slate-100 text-slate-700 rounded-xl md:rounded-2xl font-bold text-[11px] md:text-sm hover:bg-slate-200 transition-all flex items-center justify-center gap-1.5 md:gap-2">
+                            <i class="fas fa-pen"></i> Edit<span class="hidden md:inline"> Profile</span>
+                        </button>
+                        
+                        <?php if ($role === "fundi"): ?>
+                        <a href="generate_resume.php?id=<?php echo $user_id; ?>" target="_blank" class="flex-1 md:flex-none py-2.5 px-4 md:py-3 md:px-6 bg-indigo-600 text-white rounded-xl md:rounded-2xl font-bold text-[11px] md:text-sm shadow-md hover:bg-indigo-700 transition-all flex items-center justify-center gap-1.5 md:gap-2">
+                            <i class="fas fa-file-pdf"></i> Resume
+                        </a>
+                        <button onclick="copyPortfolioLink()" class="flex-1 md:flex-none md:w-auto py-2.5 px-4 md:py-3 md:px-6 bg-emerald-50 text-emerald-600 rounded-xl md:rounded-2xl font-bold text-[11px] md:text-sm hover:bg-emerald-100 transition-all flex items-center justify-center gap-1.5 md:gap-2">
+                            <i class="fas fa-share-nodes"></i> Share
+                        </button>
+                        <?php endif; ?>
+                        
+                        <a href="logout.php" class="w-full md:w-auto py-2.5 px-4 md:py-3 md:px-6 bg-rose-50 text-rose-600 rounded-xl md:rounded-2xl font-bold text-[11px] md:text-sm hover:bg-rose-100 transition-all text-center">Sign Out</a>
+                    </div>
                 </div>
 
-                <div class="text-center md:text-left flex-1">
-                    <h2 class="text-3xl md:text-4xl font-black text-slate-900 mb-2">
+                <!-- Info Section -->
+                <div class="text-center md:text-left mb-6">
+                    <h2 class="text-2xl md:text-4xl font-black text-slate-900 mb-1">
                         <?php echo htmlspecialchars($user_name); ?>
                         <?php if ($profile["is_verified"]): ?>
-                            <i class="fas fa-check-circle text-blue-500 text-xl md:text-2xl ml-1" title="Verified Account"></i>
+                            <i class="fas fa-check-circle text-blue-500 text-lg md:text-2xl ml-1" title="Verified Account"></i>
                         <?php endif; ?>
                     </h2>
+                    
                     <?php if ($role === "contractor"): ?>
-                        <p class="text-emerald-600 font-black mb-2 flex items-center justify-center md:justify-start gap-2 text-lg">
+                        <p class="text-emerald-600 font-bold mb-1 flex items-center justify-center md:justify-start gap-1.5 text-sm md:text-lg">
                             <i class="fas fa-building"></i>
                             <?php echo htmlspecialchars($profile["company_name"]); ?>
                         </p>
                     <?php endif; ?>
-                    <p class="text-slate-500 font-bold mb-6 flex items-center justify-center md:justify-start gap-2 uppercase tracking-widest text-xs">
-                        <i class="fas fa-hammer text-emerald-500"></i>
-                        <?php echo $profile["specialty"]; ?>
-                        <span class="text-slate-200">|</span>
-                        <i class="fas fa-location-dot text-blue-500"></i>
-                         <span id="display-location"><?php echo $profile["location"]; ?></span>
+                    
+                    <p class="text-slate-500 font-bold flex items-center justify-center md:justify-start gap-2 text-[10px] md:text-xs">
+                        <span class="uppercase tracking-widest text-emerald-600"><?php echo htmlspecialchars($profile["specialty"]); ?></span>
+                        <span class="text-slate-300">•</span>
+                        <span id="display-location" class="flex items-center gap-1"><i class="fas fa-location-dot text-slate-400"></i> <?php echo htmlspecialchars($profile["location"]); ?></span>
                     </p>
-                    
-                    <div class="flex flex-wrap items-center justify-center md:justify-start gap-4">
-                        <div class="bg-slate-50 px-6 py-3 rounded-2xl border border-slate-100">
-                            <span class="block text-[10px] font-black text-slate-400 uppercase tracking-tighter mb-1"><?php echo $t["trust_index"] ?? "Trust Index"; ?></span>
-                            <?php echo renderRating($profile["rating"], $profile["reviews"]); ?>
+
+                    <?php if ($role === "fundi" && $profile["bio"]): ?>
+                    <p class="mt-4 text-slate-600 text-[11px] md:text-sm leading-relaxed md:max-w-2xl px-4 md:px-0" id="display-bio">
+                        <?php echo htmlspecialchars($profile["bio"]); ?>
+                    </p>
+                    <?php endif; ?>
+                </div>
+                
+                <!-- Social Media Style Stats Row -->
+                <div class="flex justify-center md:justify-start divide-x divide-slate-100 border-y border-slate-100 py-3 md:py-4">
+                    <div class="px-3 md:px-6 flex flex-col items-center md:items-start first:pl-0">
+                        <span class="text-[8px] md:text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1"><?php echo $t["trust_index"] ?? "Trust"; ?></span>
+                        <div class="flex items-center gap-1">
+                            <span class="text-xs md:text-lg font-black text-slate-900"><?php echo number_format($profile["rating"], 1); ?></span>
+                            <i class="fas fa-star text-amber-400 text-[8px] md:text-[10px]"></i>
                         </div>
-                        <div class="bg-slate-50 px-6 py-3 rounded-2xl border border-slate-100">
-                            <span class="block text-[10px] font-black text-slate-400 uppercase tracking-tighter mb-1">Joined</span>
-                            <span class="text-xl font-black text-slate-900"><?php echo $profile["joined"]; ?></span>
-                        </div>
-                        <?php if ($role === "fundi"): ?>
-                        <div class="bg-slate-50 px-6 py-3 rounded-2xl border border-slate-100">
-                            <span class="block text-[10px] font-black text-slate-400 uppercase tracking-tighter mb-1">Projects Done</span>
-                            <span class="text-xl font-black text-slate-900"><?php echo $profile["completed"]; ?></span>
-                        </div>
-                        <div class="bg-indigo-50/50 px-6 py-3 rounded-2xl border border-indigo-100">
-                            <span class="block text-[10px] font-black text-indigo-400 uppercase tracking-tighter mb-1">TVET Level</span>
-                            <span class="text-xs font-black text-indigo-600 uppercase"><?php echo htmlspecialchars($profile["tvet_level"]); ?></span>
-                        </div>
-                        <?php endif; ?>
                     </div>
-                </div>
-
-                <div class="flex flex-col gap-3 w-full md:w-auto">
-                    <button onclick="openEditProfile()" class="w-full md:w-48 py-4 bg-slate-900 text-white rounded-2xl font-bold shadow-xl hover:scale-105 transition-all">Edit Profile</button>
                     
-                    <!-- Resume / CV Auto-Generation & Download -->
+                    <div class="px-3 md:px-6 flex flex-col items-center md:items-start">
+                        <span class="text-[8px] md:text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Joined</span>
+                        <span class="text-xs md:text-lg font-black text-slate-900"><?php echo htmlspecialchars($profile["joined"]); ?></span>
+                    </div>
+                    
                     <?php if ($role === "fundi"): ?>
-                    <a href="generate_resume.php?id=<?php echo $user_id; ?>" target="_blank" class="w-full md:w-48 py-4 bg-indigo-600 text-white text-center rounded-2xl font-bold shadow-xl hover:scale-105 transition-all flex items-center justify-center gap-2">
-                        <i class="fas fa-file-pdf text-rose-300"></i> Download Resume
-                    </a>
+                    <div class="px-3 md:px-6 flex flex-col items-center md:items-start">
+                        <span class="text-[8px] md:text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Projects</span>
+                        <span class="text-xs md:text-lg font-black text-slate-900"><?php echo (int)$profile["completed"]; ?></span>
+                    </div>
+                    
+                    <div class="px-3 md:px-6 flex flex-col items-center md:items-start pr-0">
+                        <span class="text-[8px] md:text-[10px] font-black text-indigo-400 uppercase tracking-widest mb-1">TVET</span>
+                        <?php
+                            $tvet_labels = [
+                                'Level 3' => 'Lvl 3',
+                                'Level 4' => 'Lvl 4',
+                                'Level 5' => 'Lvl 5',
+                                'Level 6' => 'Lvl 6',
+                                'None'    => 'None',
+                            ];
+                            $display_tvet = $tvet_labels[$profile["tvet_level"]] ?? 'None';
+                        ?>
+                        <span class="text-xs md:text-lg font-black text-indigo-600 uppercase"><?php echo $display_tvet; ?></span>
+                    </div>
                     <?php endif; ?>
-
-                    <!-- Shareable Portfolio Link -->
-                    <?php if ($role === "fundi"): ?>
-                    <button onclick="copyPortfolioLink()" class="w-full md:w-48 py-4 bg-emerald-50 text-emerald-600 rounded-2xl font-bold hover:bg-emerald-100 transition-all flex items-center justify-center gap-2">
-                        <i class="fas fa-share-nodes"></i> Share Portfolio
-                    </button>
-                    <?php endif; ?>
-                    <a href="logout.php" class="w-full md:w-48 py-4 bg-rose-50 text-rose-600 text-center rounded-2xl font-bold hover:bg-rose-100 transition-all">Sign Out</a>
                 </div>
             </div>
-
-            <?php if ($role === "fundi" && $profile["bio"]): ?>
-            <div class="mt-8 pt-8 border-t border-slate-100">
-                <p class="text-slate-600 leading-relaxed text-sm max-w-2xl italic" id="display-bio">
-                    "<?php echo htmlspecialchars($profile["bio"]); ?>"
-                </p>
-            </div>
-            <?php endif; ?>
         </div>
 
         <!-- Edit Profile Modal Overlay -->
@@ -318,14 +341,18 @@ include "includes/header.php";
                             </select>
                         </div>
 
+                        <?php
+                            $valid_tvet_levels = ['Level 3', 'Level 4', 'Level 5', 'Level 6'];
+                            $current_tvet = in_array($full_profile['tvet_level'], $valid_tvet_levels) ? $full_profile['tvet_level'] : 'None';
+                        ?>
                         <div class="space-y-2">
                             <label class="block text-[10px] font-black uppercase text-slate-400 ml-2">TVET Certification Level</label>
                             <select name="tvet_level" class="w-full bg-slate-50 border-2 border-transparent focus:border-emerald-500/20 rounded-2xl p-4 text-sm font-bold outline-none transition-all appearance-none cursor-pointer">
-                                <option value="None" <?php echo ($full_profile['tvet_level'] == 'None') ? 'selected' : ''; ?>>Not Certified / Level 0</option>
-                                <option value="Level 1" <?php echo ($full_profile['tvet_level'] == 'Level 1') ? 'selected' : ''; ?>>TVET Level 1 (Artisan)</option>
-                                <option value="Level 2" <?php echo ($full_profile['tvet_level'] == 'Level 2') ? 'selected' : ''; ?>>TVET Level 2 (Craft)</option>
-                                <option value="Level 3" <?php echo ($full_profile['tvet_level'] == 'Level 3') ? 'selected' : ''; ?>>TVET Level 3 (Diploma)</option>
-                                <option value="Level 4" <?php echo ($full_profile['tvet_level'] == 'Level 4') ? 'selected' : ''; ?>>TVET Level 4 (Technical Diploma)</option>
+                                <option value="None" <?php echo ($current_tvet === 'None') ? 'selected' : ''; ?>>Not Certified</option>
+                                <option value="Level 3" <?php echo ($current_tvet === 'Level 3') ? 'selected' : ''; ?>>Level 3 (Entry)</option>
+                                <option value="Level 4" <?php echo ($current_tvet === 'Level 4') ? 'selected' : ''; ?>>Level 4 (Artisan)</option>
+                                <option value="Level 5" <?php echo ($current_tvet === 'Level 5') ? 'selected' : ''; ?>>Level 5 (Certificate)</option>
+                                <option value="Level 6" <?php echo ($current_tvet === 'Level 6') ? 'selected' : ''; ?>>Level 6 (Diploma)</option>
                             </select>
                         </div>
                         <div class="space-y-2">
@@ -352,7 +379,7 @@ include "includes/header.php";
 
         <!-- Portfolio & Professional Info (If Fundi) -->
         <?php if ($role === "fundi"): ?>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 px-4 md:px-0">
             <!-- Left Side: Portfolio Gallery (Wide) -->
             <div class="md:col-span-2 space-y-8">
                 <section>
@@ -372,11 +399,15 @@ include "includes/header.php";
                         <?php endif; ?>
 
                         <?php foreach ($portfolio_items as $item): ?>
-                        <div class="aspect-square bg-slate-100 rounded-[2.5rem] overflow-hidden relative group cursor-pointer shadow-lg">
+                        <div onclick="openProjectDetail(<?php echo $item['id']; ?>, <?php echo htmlspecialchars(json_encode($item['title'])); ?>, <?php echo htmlspecialchars(json_encode($item['description'] ?? '')); ?>, <?php echo htmlspecialchars(json_encode($item['image_url'])); ?>, <?php echo htmlspecialchars(json_encode($item['completion_date'])); ?>)"
+                             class="aspect-square bg-slate-100 rounded-[2.5rem] overflow-hidden relative group cursor-pointer shadow-lg hover:shadow-2xl transition-all duration-300">
                            <img src="<?php echo htmlspecialchars($item["image_url"]); ?>" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
                            <div class="absolute inset-0 bg-gradient-to-t from-slate-950/80 to-transparent opacity-0 group-hover:opacity-100 transition-all flex flex-col justify-end p-6">
                                <span class="text-white font-black text-sm mb-1"><?php echo htmlspecialchars($item["title"]); ?></span>
                                <span class="text-white/60 text-[10px] uppercase tracking-widest"><?php echo date("M Y", strtotime($item["completion_date"])); ?></span>
+                               <div class="mt-2 flex items-center gap-1 text-emerald-400 text-[10px] font-black uppercase tracking-widest">
+                                   <i class="fas fa-eye text-xs"></i> <span>View Details</span>
+                               </div>
                            </div>
                         </div>
                         <?php endforeach; ?>
@@ -393,14 +424,22 @@ include "includes/header.php";
 
                     <div class="space-y-4">
                         <?php foreach ($experiences as $exp): ?>
-                        <div class="bg-white p-6 rounded-[2rem] border border-slate-50 shadow-sm flex items-start gap-4">
+                        <div class="bg-white p-6 rounded-[2rem] border border-slate-50 shadow-sm flex items-start gap-4 group">
                             <div class="w-12 h-12 bg-slate-100 rounded-2xl flex items-center justify-center text-slate-400 shrink-0">
                                 <i class="fas fa-briefcase"></i>
                             </div>
                             <div class="flex-1">
                                 <h4 class="font-black text-slate-900"><?php echo htmlspecialchars($exp["role"]); ?></h4>
                                 <p class="text-xs font-bold text-slate-500 mb-2"><?php echo htmlspecialchars($exp["company"]); ?> • <?php echo date("M Y", strtotime($exp["start_date"])); ?> - <?php echo $exp["end_date"] ? date("M Y", strtotime($exp["end_date"])) : "Present"; ?></p>
-                                <p class="text-xs text-slate-400 leading-relaxed"><?php echo htmlspecialchars($exp["description"]); ?></p>
+                                <p class="text-xs text-slate-400 leading-relaxed mb-4"><?php echo htmlspecialchars($exp["description"]); ?></p>
+                                <div class="flex gap-2">
+                                    <button onclick="openEditItem('experience', <?php echo $exp['id']; ?>, <?php echo htmlspecialchars(json_encode(['role'=>$exp['role'],'company'=>$exp['company'],'start_date'=>$exp['start_date'],'end_date'=>$exp['end_date'],'description'=>$exp['description']])); ?>)" class="flex items-center gap-1.5 px-4 py-2 bg-slate-100 hover:bg-blue-50 hover:text-blue-600 text-slate-600 rounded-xl text-xs font-bold transition-all active:scale-95">
+                                        <i class="fas fa-pen"></i> <span>Edit</span>
+                                    </button>
+                                    <button onclick="deleteItem('experience', <?php echo $exp['id']; ?>)" class="flex items-center gap-1.5 px-4 py-2 bg-slate-100 hover:bg-rose-50 hover:text-rose-600 text-slate-500 rounded-xl text-xs font-bold transition-all active:scale-95">
+                                        <i class="fas fa-trash-can"></i> <span>Delete</span>
+                                    </button>
+                                </div>
                             </div>
                         </div>
                         <?php endforeach; ?>
@@ -467,7 +506,7 @@ include "includes/header.php";
                         </div>
                         <?php else: ?>
                             <?php foreach ($education as $edu): ?>
-                            <div class="bg-white p-6 rounded-[2rem] border border-slate-50 shadow-sm flex items-start gap-4">
+                            <div class="bg-white p-6 rounded-[2rem] border border-slate-50 shadow-sm flex items-start gap-4 group">
                                 <div class="w-12 h-12 bg-slate-100 rounded-2xl flex items-center justify-center text-indigo-500 shrink-0">
                                     <i class="fas fa-graduation-cap"></i>
                                 </div>
@@ -475,8 +514,16 @@ include "includes/header.php";
                                     <h4 class="font-black text-slate-900"><?php echo htmlspecialchars($edu["credential"]); ?></h4>
                                     <p class="text-xs font-bold text-slate-500 mb-2"><?php echo htmlspecialchars($edu["institution"]); ?> • <?php echo date("M Y", strtotime($edu["start_date"])); ?> - <?php echo $edu["end_date"] ? date("M Y", strtotime($edu["end_date"])) : "Present"; ?></p>
                                     <?php if ($edu["description"]): ?>
-                                    <p class="text-xs text-slate-400 leading-relaxed"><?php echo htmlspecialchars($edu["description"]); ?></p>
-                                    <?php endif; ?>
+                                    <p class="text-xs text-slate-400 leading-relaxed mb-4"><?php echo htmlspecialchars($edu["description"]); ?></p>
+                                    <?php else: ?><div class="mb-2"></div><?php endif; ?>
+                                    <div class="flex gap-2">
+                                        <button onclick="openEditItem('education', <?php echo $edu['id']; ?>, <?php echo htmlspecialchars(json_encode(['credential'=>$edu['credential'],'institution'=>$edu['institution'],'start_date'=>$edu['start_date'],'end_date'=>$edu['end_date'],'description'=>$edu['description']])); ?>)" class="flex items-center gap-1.5 px-4 py-2 bg-slate-100 hover:bg-indigo-50 hover:text-indigo-600 text-slate-600 rounded-xl text-xs font-bold transition-all active:scale-95">
+                                            <i class="fas fa-pen"></i> <span>Edit</span>
+                                        </button>
+                                        <button onclick="deleteItem('education', <?php echo $edu['id']; ?>)" class="flex items-center gap-1.5 px-4 py-2 bg-slate-100 hover:bg-rose-50 hover:text-rose-600 text-slate-500 rounded-xl text-xs font-bold transition-all active:scale-95">
+                                            <i class="fas fa-trash-can"></i> <span>Delete</span>
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                             <?php endforeach; ?>
@@ -500,7 +547,7 @@ include "includes/header.php";
                         </div>
                         <?php else: ?>
                             <?php foreach ($achievements as $ach): ?>
-                            <div class="bg-white p-6 rounded-[2rem] border border-slate-50 shadow-sm flex items-start gap-4">
+                            <div class="bg-white p-6 rounded-[2rem] border border-slate-50 shadow-sm flex items-start gap-4 group">
                                 <div class="w-12 h-12 bg-slate-100 rounded-2xl flex items-center justify-center text-amber-500 shrink-0">
                                     <i class="fas fa-trophy"></i>
                                 </div>
@@ -509,7 +556,15 @@ include "includes/header.php";
                                     <?php if ($ach["date_awarded"]): ?>
                                     <p class="text-xs font-bold text-slate-400 mb-2">Awarded: <?php echo date("M Y", strtotime($ach["date_awarded"])); ?></p>
                                     <?php endif; ?>
-                                    <p class="text-xs text-slate-500 leading-relaxed"><?php echo htmlspecialchars($ach["description"]); ?></p>
+                                    <p class="text-xs text-slate-500 leading-relaxed mb-4"><?php echo htmlspecialchars($ach["description"]); ?></p>
+                                    <div class="flex gap-2">
+                                        <button onclick="openEditItem('achievement', <?php echo $ach['id']; ?>, <?php echo htmlspecialchars(json_encode(['title'=>$ach['title'],'description'=>$ach['description'],'date_awarded'=>$ach['date_awarded']])); ?>)" class="flex items-center gap-1.5 px-4 py-2 bg-slate-100 hover:bg-amber-50 hover:text-amber-600 text-slate-600 rounded-xl text-xs font-bold transition-all active:scale-95">
+                                            <i class="fas fa-pen"></i> <span>Edit</span>
+                                        </button>
+                                        <button onclick="deleteItem('achievement', <?php echo $ach['id']; ?>)" class="flex items-center gap-1.5 px-4 py-2 bg-slate-100 hover:bg-rose-50 hover:text-rose-600 text-slate-500 rounded-xl text-xs font-bold transition-all active:scale-95">
+                                            <i class="fas fa-trash-can"></i> <span>Delete</span>
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                             <?php endforeach; ?>
@@ -533,7 +588,18 @@ include "includes/header.php";
                         <div class="bg-amber-50/50 p-6 rounded-[2rem] border border-amber-50 shadow-sm relative overflow-hidden group">
                             <div class="absolute -right-4 -top-4 w-16 h-16 bg-amber-400/10 rounded-full group-hover:scale-150 transition-all"></div>
                             <h4 class="font-black text-slate-900 text-sm mb-1"><?php echo htmlspecialchars($cert["title"]); ?></h4>
-                            <p class="text-[10px] font-bold text-amber-700 uppercase tracking-widest"><?php echo htmlspecialchars($cert["institution"]); ?></p>
+                            <p class="text-[10px] font-bold text-amber-700 uppercase tracking-widest mb-3"><?php echo htmlspecialchars($cert["institution"]); ?></p>
+                            <?php if ($cert['issue_date']): ?>
+                            <p class="text-[10px] text-slate-400 font-bold mb-3"><?php echo date('M Y', strtotime($cert['issue_date'])); ?></p>
+                            <?php endif; ?>
+                            <div class="flex gap-2 relative z-10">
+                                <button onclick="openEditItem('certification', <?php echo $cert['id']; ?>, <?php echo htmlspecialchars(json_encode(['title'=>$cert['title'],'institution'=>$cert['institution'],'issue_date'=>$cert['issue_date']])); ?>)" class="flex items-center gap-1.5 px-4 py-2 bg-white/80 hover:bg-amber-50 hover:text-amber-700 text-slate-600 rounded-xl text-xs font-bold transition-all active:scale-95">
+                                    <i class="fas fa-pen"></i> <span>Edit</span>
+                                </button>
+                                <button onclick="deleteItem('certification', <?php echo $cert['id']; ?>)" class="flex items-center gap-1.5 px-4 py-2 bg-white/80 hover:bg-rose-50 hover:text-rose-600 text-slate-500 rounded-xl text-xs font-bold transition-all active:scale-95">
+                                    <i class="fas fa-trash-can"></i> <span>Delete</span>
+                                </button>
+                            </div>
                         </div>
                         <?php endforeach; ?>
                     </div>
@@ -555,22 +621,32 @@ include "includes/header.php";
                         <?php endif; ?>
 
                         <?php foreach ($gigs as $gig): ?>
-                        <div class="bg-indigo-50/30 p-5 rounded-[2.5rem] border <?php echo $gig['is_active'] ? 'border-indigo-100/50' : 'border-slate-200 opacity-75'; ?> flex items-center gap-4 group hover:bg-white transition-all cursor-pointer">
-                            <div class="w-16 h-16 bg-white rounded-2xl shadow-sm flex items-center justify-center text-indigo-500 overflow-hidden">
-                                <?php if ($gig["image_url"]): ?>
-                                    <img src="<?php echo htmlspecialchars($gig["image_url"]); ?>" class="w-full h-full object-cover">
-                                <?php else: ?>
-                                    <i class="fas <?php echo $gig['is_active'] ? 'fa-tools' : 'fa-check-circle'; ?> text-xl"></i>
-                                <?php endif; ?>
-                            </div>
-                            <div class="flex-1">
-                                <h4 class="text-sm font-black text-slate-900 group-hover:text-indigo-600 transition-colors">
-                                    <?php echo htmlspecialchars($gig["title"]); ?>
-                                    <?php if (!$gig['is_active']): ?>
-                                        <span class="ml-1 text-[8px] px-2 py-0.5 bg-slate-200 text-slate-500 rounded-full uppercase">Verified Completion</span>
+                        <div class="bg-indigo-50/30 p-5 rounded-[2.5rem] border <?php echo $gig['is_active'] ? 'border-indigo-100/50' : 'border-slate-200 opacity-75'; ?> group hover:bg-white transition-all">
+                            <div class="flex items-center gap-4 mb-4">
+                                <div class="w-16 h-16 bg-white rounded-2xl shadow-sm flex items-center justify-center text-indigo-500 overflow-hidden shrink-0">
+                                    <?php if ($gig["image_url"]): ?>
+                                        <img src="<?php echo htmlspecialchars($gig["image_url"]); ?>" class="w-full h-full object-cover">
+                                    <?php else: ?>
+                                        <i class="fas <?php echo $gig['is_active'] ? 'fa-tools' : 'fa-check-circle'; ?> text-xl"></i>
                                     <?php endif; ?>
-                                </h4>
-                                <p class="text-[10px] font-bold text-emerald-600 uppercase tracking-tighter">Starting at KSh <?php echo number_format($gig["price_amount"]); ?></p>
+                                </div>
+                                <div class="flex-1">
+                                    <h4 class="text-sm font-black text-slate-900 group-hover:text-indigo-600 transition-colors">
+                                        <?php echo htmlspecialchars($gig["title"]); ?>
+                                        <?php if (!$gig['is_active']): ?>
+                                            <span class="ml-1 text-[8px] px-2 py-0.5 bg-slate-200 text-slate-500 rounded-full uppercase">Verified Completion</span>
+                                        <?php endif; ?>
+                                    </h4>
+                                    <p class="text-[10px] font-bold text-emerald-600 uppercase tracking-tighter">Starting at KSh <?php echo number_format($gig["price_amount"]); ?></p>
+                                </div>
+                            </div>
+                            <div class="flex gap-2">
+                                <button onclick="openEditItem('gig', <?php echo $gig['id']; ?>, <?php echo htmlspecialchars(json_encode(['title'=>$gig['title'],'description'=>$gig['description'],'price'=>$gig['price_amount']])); ?>)" class="flex items-center gap-1.5 px-4 py-2 bg-white hover:bg-indigo-50 hover:text-indigo-600 text-slate-600 rounded-xl text-xs font-bold transition-all active:scale-95 shadow-sm">
+                                    <i class="fas fa-pen"></i> <span>Edit</span>
+                                </button>
+                                <button onclick="deleteItem('gig', <?php echo $gig['id']; ?>)" class="flex items-center gap-1.5 px-4 py-2 bg-white hover:bg-rose-50 hover:text-rose-600 text-slate-500 rounded-xl text-xs font-bold transition-all active:scale-95 shadow-sm">
+                                    <i class="fas fa-trash-can"></i> <span>Delete</span>
+                                </button>
                             </div>
                         </div>
                         <?php endforeach; ?>
@@ -623,10 +699,18 @@ include "includes/header.php";
                                         • <?php echo htmlspecialchars($ref["relationship"]); ?>
                                     <?php endif; ?>
                                 </p>
-                                <p class="text-xs text-slate-500 flex items-center gap-1.5 mt-3">
+                                <p class="text-xs text-slate-500 flex items-center gap-1.5 mt-3 mb-4">
                                     <i class="fas fa-phone text-slate-300"></i>
                                     <?php echo htmlspecialchars($ref["contact_info"]); ?>
                                 </p>
+                                <div class="flex gap-2 relative z-10">
+                                    <button onclick="openEditItem('reference', <?php echo $ref['id']; ?>, <?php echo htmlspecialchars(json_encode(['name'=>$ref['name'],'organization'=>$ref['organization'],'relationship'=>$ref['relationship'],'contact_info'=>$ref['contact_info']])); ?>)" class="flex items-center gap-1.5 px-4 py-2 bg-slate-50 hover:bg-emerald-50 hover:text-emerald-700 text-slate-600 rounded-xl text-xs font-bold transition-all active:scale-95">
+                                        <i class="fas fa-pen"></i> <span>Edit</span>
+                                    </button>
+                                    <button onclick="deleteItem('reference', <?php echo $ref['id']; ?>)" class="flex items-center gap-1.5 px-4 py-2 bg-slate-50 hover:bg-rose-50 hover:text-rose-600 text-slate-500 rounded-xl text-xs font-bold transition-all active:scale-95">
+                                        <i class="fas fa-trash-can"></i> <span>Delete</span>
+                                    </button>
+                                </div>
                             </div>
                             <?php endforeach; ?>
                         <?php endif; ?>
@@ -638,7 +722,7 @@ include "includes/header.php";
 
         <!-- Phase 3: Hirer Job Management -->
         <?php if ($role === "hirer"): ?>
-        <section class="mt-12">
+        <section class="mt-12 px-4 md:px-0">
             <div class="flex items-center justify-between mb-8 px-2">
                 <h3 class="text-2xl font-black text-slate-900">Your Active Jobs</h3>
                 <a href="index.php" class="bg-emerald-500 text-white px-6 py-3 rounded-2xl font-bold hover:scale-105 transition-all shadow-lg shadow-emerald-200">
@@ -774,6 +858,145 @@ include "includes/header.php";
     </div>
     </main>
 
+    <!-- Project Detail / Edit Modal -->
+    <div id="project-detail-modal" class="fixed inset-0 z-[140] hidden overflow-y-auto no-scrollbar">
+        <div class="absolute inset-0 bg-slate-950/70 backdrop-blur-sm" onclick="closeProjectDetail()"></div>
+        <div class="relative w-full min-h-screen flex items-center justify-center p-4 py-10">
+            <div class="bg-white w-full max-w-xl rounded-[3rem] shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-300">
+
+                <!-- Header -->
+                <div class="flex items-center justify-between px-8 pt-8 pb-4">
+                    <div id="pd-mode-label" class="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-emerald-600">
+                        <i class="fas fa-image"></i> <span>Project Details</span>
+                    </div>
+                    <button onclick="closeProjectDetail()" class="w-10 h-10 bg-slate-50 rounded-full flex items-center justify-center text-slate-400 hover:text-rose-500 transition-all">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+
+                <!-- === VIEW MODE === -->
+                <div id="pd-view-mode" class="px-8 pb-8">
+                    <!-- Project Image -->
+                    <div class="w-full h-56 md:h-72 rounded-[2rem] overflow-hidden bg-slate-100 mb-6 shadow-lg">
+                        <img id="pd-image" src="" alt="Project" class="w-full h-full object-cover">
+                    </div>
+
+                    <!-- Title -->
+                    <h2 id="pd-title" class="text-2xl font-black text-slate-900 mb-2 leading-tight"></h2>
+
+                    <!-- Date -->
+                    <p id="pd-date" class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4"></p>
+
+                    <!-- Description -->
+                    <p id="pd-description" class="text-sm text-slate-600 leading-relaxed mb-8"></p>
+
+                    <!-- Action Buttons -->
+                    <div class="flex gap-3 flex-wrap">
+                        <button onclick="switchToEditMode()" class="flex-1 flex items-center justify-center gap-2 py-4 bg-slate-900 text-white rounded-2xl font-bold text-sm hover:bg-emerald-600 transition-all shadow-lg active:scale-95">
+                            <i class="fas fa-pen-to-square"></i>
+                            <span>Edit Project</span>
+                        </button>
+                        <button onclick="deleteProject()" class="flex items-center justify-center gap-2 px-6 py-4 bg-rose-50 text-rose-600 border border-rose-100 rounded-2xl font-bold text-sm hover:bg-rose-500 hover:text-white hover:border-rose-500 transition-all active:scale-95">
+                            <i class="fas fa-trash-can"></i>
+                            <span>Delete</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- === EDIT MODE === -->
+                <div id="pd-edit-mode" class="px-8 pb-8 hidden">
+                    <form id="pd-edit-form" class="space-y-5">
+                        <input type="hidden" id="pd-edit-id" name="item_id">
+                        <input type="hidden" name="action" value="edit_portfolio">
+
+                        <!-- Optional image re-upload -->
+                        <div class="space-y-2">
+                            <label class="block text-[10px] font-black uppercase text-slate-400 ml-2">
+                                <i class="fas fa-camera mr-1"></i> Change Image (optional)
+                            </label>
+                            <label class="w-full h-40 rounded-[2rem] bg-slate-50 border-2 border-dashed border-slate-200 flex flex-col items-center justify-center cursor-pointer overflow-hidden group hover:border-emerald-500/30 transition-all">
+                                <input type="file" name="image" class="hidden" accept="image/*" onchange="previewEditImage(this)">
+                                <div id="pd-edit-preview" class="w-full h-full flex flex-col items-center justify-center text-slate-300">
+                                    <i class="fas fa-cloud-upload-alt text-3xl mb-2 group-hover:text-emerald-500 transition-colors"></i>
+                                    <span class="text-[10px] font-bold uppercase tracking-widest">Upload New Photo</span>
+                                </div>
+                            </label>
+                        </div>
+
+                        <div class="space-y-2">
+                            <label class="block text-[10px] font-black uppercase text-slate-400 ml-2">
+                                <i class="fas fa-heading mr-1"></i> Project Title
+                            </label>
+                            <input type="text" name="title" id="pd-edit-title" required
+                                   class="w-full bg-slate-50 border-2 border-transparent focus:border-emerald-500/30 rounded-2xl p-4 text-sm font-bold outline-none transition-all">
+                        </div>
+
+                        <div class="space-y-2">
+                            <label class="block text-[10px] font-black uppercase text-slate-400 ml-2">
+                                <i class="fas fa-align-left mr-1"></i> Description
+                            </label>
+                            <textarea name="description" id="pd-edit-description" rows="3"
+                                      class="w-full bg-slate-50 border-2 border-transparent focus:border-emerald-500/30 rounded-2xl p-4 text-sm font-bold outline-none transition-all resize-none"></textarea>
+                        </div>
+
+                        <div class="space-y-2">
+                            <label class="block text-[10px] font-black uppercase text-slate-400 ml-2">
+                                <i class="fas fa-calendar mr-1"></i> Completion Date
+                            </label>
+                            <input type="date" name="completion_date" id="pd-edit-date"
+                                   class="w-full bg-slate-50 border-2 border-transparent focus:border-emerald-500/30 rounded-2xl p-4 text-sm font-bold outline-none transition-all">
+                        </div>
+
+                        <div class="flex gap-3 pt-2">
+                            <button type="submit" class="flex-1 flex items-center justify-center gap-2 py-4 bg-emerald-500 text-white rounded-2xl font-bold text-sm hover:bg-emerald-600 transition-all shadow-lg shadow-emerald-100 active:scale-95">
+                                <i class="fas fa-floppy-disk"></i>
+                                <span>Save Changes</span>
+                            </button>
+                            <button type="button" onclick="switchToViewMode()" class="flex items-center justify-center gap-2 px-6 py-4 bg-slate-100 text-slate-600 rounded-2xl font-bold text-sm hover:bg-slate-200 transition-all active:scale-95">
+                                <i class="fas fa-arrow-left"></i>
+                                <span>Cancel</span>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Universal Edit Item Modal -->
+    <div id="edit-item-modal" class="fixed inset-0 z-[150] hidden overflow-y-auto no-scrollbar">
+        <div class="absolute inset-0 bg-slate-950/70 backdrop-blur-sm" onclick="closeEditItem()"></div>
+        <div class="relative w-full min-h-screen flex items-center justify-center p-4 py-10">
+            <div class="bg-white w-full max-w-lg rounded-[3rem] shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-300">
+                <div class="flex items-center justify-between px-8 pt-8 pb-4">
+                    <div id="ei-mode-label" class="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-emerald-600">
+                        <i class="fas fa-pen-to-square"></i> <span id="ei-title-label">Edit Item</span>
+                    </div>
+                    <button onclick="closeEditItem()" class="w-10 h-10 bg-slate-50 rounded-full flex items-center justify-center text-slate-400 hover:text-rose-500 transition-all">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="px-8 pb-8">
+                    <form id="edit-item-form" class="space-y-4">
+                        <input type="hidden" id="ei-item-id" name="item_id">
+                        <input type="hidden" id="ei-action" name="action">
+                        <div id="ei-fields" class="space-y-4"></div>
+                        <div class="flex gap-3 pt-2">
+                            <button type="submit" class="flex-1 flex items-center justify-center gap-2 py-4 bg-emerald-500 text-white rounded-2xl font-bold text-sm hover:bg-emerald-600 transition-all shadow-lg shadow-emerald-100 active:scale-95">
+                                <i class="fas fa-floppy-disk"></i> <span>Save Changes</span>
+                            </button>
+                            <button type="button" onclick="closeEditItem()" class="flex items-center justify-center gap-2 px-6 py-4 bg-slate-100 text-slate-600 rounded-2xl font-bold text-sm hover:bg-slate-200 transition-all active:scale-95">
+                                <i class="fas fa-times"></i> <span>Cancel</span>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
 <?php include "includes/footer.php"; ?>
 
 <script>
@@ -794,6 +1017,291 @@ function openAddGig() { openPortfolioModal('add_gig', 'Create Quick Gig'); }
 function openAddEducation() { openPortfolioModal('add_education', 'Add Education Detail'); }
 function openAddReference() { openPortfolioModal('add_reference', 'Add Character Reference'); }
 function openAddAchievement() { openPortfolioModal('add_achievement', 'Add Achievement'); }
+
+// =============================================
+// Universal Edit / Delete for all item types
+// =============================================
+
+const EI_FIELD_CSS = 'w-full bg-slate-50 border-2 border-transparent focus:border-emerald-500/30 rounded-2xl p-4 text-sm font-bold outline-none transition-all';
+const EI_LABEL_CSS = 'block text-[10px] font-black uppercase text-slate-400 ml-2 mb-1';
+
+function eiField(icon, label, inputHtml) {
+    return `<div><label class="${EI_LABEL_CSS}"><i class="fas ${icon} mr-1"></i>${label}</label>${inputHtml}</div>`;
+}
+
+const EI_CONFIG = {
+    experience: {
+        label: 'Edit Experience',
+        action: 'edit_experience',
+        fields: (d) => `
+            ${eiField('fa-hard-hat', 'Position / Role', `<input type="text" name="role" value="${escHtml(d.role)}" required class="${EI_FIELD_CSS}">`)}
+            ${eiField('fa-building', 'Company / Workshop', `<input type="text" name="company" value="${escHtml(d.company)}" required class="${EI_FIELD_CSS}">`)}
+            <div class="grid grid-cols-2 gap-4">
+                ${eiField('fa-calendar-day', 'Start Date', `<input type="date" name="start_date" value="${d.start_date || ''}" required class="${EI_FIELD_CSS}">`)}
+                ${eiField('fa-calendar-check', 'End Date (leave blank = Present)', `<input type="date" name="end_date" value="${d.end_date || ''}" class="${EI_FIELD_CSS}">`)}
+            </div>
+            ${eiField('fa-align-left', 'Description', `<textarea name="description" rows="3" class="${EI_FIELD_CSS} resize-none">${escHtml(d.description)}</textarea>`)}
+        `
+    },
+    education: {
+        label: 'Edit Education',
+        action: 'edit_education',
+        fields: (d) => `
+            ${eiField('fa-graduation-cap', 'Institution / School', `<input type="text" name="title" value="${escHtml(d.institution)}" required class="${EI_FIELD_CSS}">`)}
+            ${eiField('fa-certificate', 'Degree / Certificate', `<input type="text" name="credential" value="${escHtml(d.credential)}" required class="${EI_FIELD_CSS}">`)}
+            <div class="grid grid-cols-2 gap-4">
+                ${eiField('fa-calendar-day', 'Start Date', `<input type="date" name="start_date" value="${d.start_date || ''}" required class="${EI_FIELD_CSS}">`)}
+                ${eiField('fa-calendar-check', 'End Date (leave blank = Present)', `<input type="date" name="end_date" value="${d.end_date || ''}" class="${EI_FIELD_CSS}">`)}
+            </div>
+            ${eiField('fa-align-left', 'Description', `<textarea name="description" rows="2" class="${EI_FIELD_CSS} resize-none">${escHtml(d.description)}</textarea>`)}
+        `
+    },
+    achievement: {
+        label: 'Edit Achievement',
+        action: 'edit_achievement',
+        fields: (d) => `
+            ${eiField('fa-trophy', 'Achievement Title', `<input type="text" name="title" value="${escHtml(d.title)}" required class="${EI_FIELD_CSS}">`)}
+            ${eiField('fa-calendar', 'Date Awarded', `<input type="date" name="date_awarded" value="${d.date_awarded ? d.date_awarded.substring(0,10) : ''}" class="${EI_FIELD_CSS}">`)}
+            ${eiField('fa-align-left', 'Description', `<textarea name="description" rows="3" class="${EI_FIELD_CSS} resize-none">${escHtml(d.description)}</textarea>`)}
+        `
+    },
+    certification: {
+        label: 'Edit Certification',
+        action: 'edit_cert',
+        fields: (d) => `
+            ${eiField('fa-certificate', 'Certification Title', `<input type="text" name="title" value="${escHtml(d.title)}" required class="${EI_FIELD_CSS}">`)}
+            ${eiField('fa-school', 'Issuing Institution', `<input type="text" name="institution" value="${escHtml(d.institution)}" required class="${EI_FIELD_CSS}">`)}
+            ${eiField('fa-calendar', 'Issue Date', `<input type="date" name="issue_date" value="${d.issue_date ? d.issue_date.substring(0,10) : ''}" class="${EI_FIELD_CSS}">`)}
+        `
+    },
+    gig: {
+        label: 'Edit Gig',
+        action: 'edit_gig',
+        fields: (d) => `
+            ${eiField('fa-bolt', 'Service Title', `<input type="text" name="title" value="${escHtml(d.title)}" required class="${EI_FIELD_CSS}">`)}
+            ${eiField('fa-money-bill', 'Starting Price (KSh)', `<input type="number" name="price" value="${d.price || ''}" required placeholder="e.g. 1500" class="${EI_FIELD_CSS}">`)}
+            ${eiField('fa-align-left', 'Description', `<textarea name="description" rows="2" class="${EI_FIELD_CSS} resize-none">${escHtml(d.description)}</textarea>`)}
+        `
+    },
+    reference: {
+        label: 'Edit Reference',
+        action: 'edit_reference',
+        fields: (d) => `
+            ${eiField('fa-user', 'Reference Name', `<input type="text" name="title" value="${escHtml(d.name)}" required class="${EI_FIELD_CSS}">`)}
+            ${eiField('fa-building', 'Organization / Company', `<input type="text" name="organization" value="${escHtml(d.organization)}" class="${EI_FIELD_CSS}">`)}
+            ${eiField('fa-handshake', 'Relationship', `<input type="text" name="relationship" value="${escHtml(d.relationship)}" class="${EI_FIELD_CSS}">`)}
+            ${eiField('fa-phone', 'Contact (Phone / Email)', `<input type="text" name="contact_info" value="${escHtml(d.contact_info)}" required class="${EI_FIELD_CSS}">`)}
+        `
+    }
+};
+
+const DELETE_ACTIONS = {
+    experience: 'delete_experience',
+    education: 'delete_education',
+    achievement: 'delete_achievement',
+    certification: 'delete_cert',
+    gig: 'delete_gig',
+    reference: 'delete_reference'
+};
+
+function escHtml(str) {
+    if (!str) return '';
+    return String(str).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function openEditItem(type, id, data) {
+    const cfg = EI_CONFIG[type];
+    if (!cfg) return;
+
+    document.getElementById('ei-title-label').textContent = cfg.label;
+    document.getElementById('ei-item-id').value = id;
+    document.getElementById('ei-action').value = cfg.action;
+    document.getElementById('ei-fields').innerHTML = cfg.fields(data);
+
+    // Reset submit button
+    const btn = document.querySelector('#edit-item-form button[type="submit"]');
+    btn.innerHTML = '<i class="fas fa-floppy-disk"></i> <span>Save Changes</span>';
+    btn.disabled = false;
+
+    document.getElementById('edit-item-modal').classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+}
+
+function closeEditItem() {
+    document.getElementById('edit-item-modal').classList.add('hidden');
+    document.body.style.overflow = 'auto';
+}
+
+function deleteItem(type, id) {
+    const labels = {
+        experience: 'experience entry', education: 'education entry',
+        achievement: 'achievement', certification: 'certification',
+        gig: 'gig listing', reference: 'character reference'
+    };
+    if (!confirm(`Delete this ${labels[type] || 'item'}? This cannot be undone.`)) return;
+
+    const fd = new FormData();
+    fd.append('action', DELETE_ACTIONS[type]);
+    fd.append('item_id', id);
+
+    fetch('ajax/manage_portfolio.php?t=' + Date.now(), { method: 'POST', body: fd })
+        .then(r => r.json())
+        .then(res => {
+            if (res.success) { location.reload(); }
+            else { alert(res.message || 'Delete failed.'); }
+        })
+        .catch(() => alert('Error. Please try again.'));
+}
+
+const editItemForm = document.getElementById('edit-item-form');
+if (editItemForm) {
+    editItemForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        const fd = new FormData(this);
+        const btn = this.querySelector('button[type="submit"]');
+        btn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> <span>Saving...</span>';
+        btn.disabled = true;
+
+        fetch('ajax/manage_portfolio.php?t=' + Date.now(), { method: 'POST', body: fd })
+            .then(r => r.json())
+            .then(res => {
+                if (res.success) { closeEditItem(); location.reload(); }
+                else {
+                    alert(res.message || 'Save failed.');
+                    btn.innerHTML = '<i class="fas fa-floppy-disk"></i> <span>Save Changes</span>';
+                    btn.disabled = false;
+                }
+            })
+            .catch(() => {
+                alert('Error. Please try again.');
+                btn.innerHTML = '<i class="fas fa-floppy-disk"></i> <span>Save Changes</span>';
+                btn.disabled = false;
+            });
+    });
+}
+
+// ===========================
+// Project Detail / Edit Modal
+// ===========================
+let _currentProjectId = null;
+
+function openProjectDetail(id, title, description, imageUrl, completionDate) {
+    _currentProjectId = id;
+
+    // Populate view mode
+    document.getElementById('pd-image').src = imageUrl;
+    document.getElementById('pd-title').textContent = title;
+    document.getElementById('pd-description').textContent = description || 'No description provided.';
+
+    // Format the date nicely
+    if (completionDate) {
+        const d = new Date(completionDate);
+        const options = { year: 'numeric', month: 'long' };
+        document.getElementById('pd-date').textContent = 'Completed: ' + d.toLocaleDateString('en-KE', options);
+    } else {
+        document.getElementById('pd-date').textContent = '';
+    }
+
+    // Pre-fill edit fields
+    document.getElementById('pd-edit-id').value = id;
+    document.getElementById('pd-edit-title').value = title;
+    document.getElementById('pd-edit-description').value = description || '';
+    document.getElementById('pd-edit-date').value = completionDate ? completionDate.substring(0, 10) : '';
+
+    // Reset edit preview
+    document.getElementById('pd-edit-preview').innerHTML = `
+        <i class="fas fa-cloud-upload-alt text-3xl mb-2 text-slate-300"></i>
+        <span class="text-[10px] font-bold uppercase tracking-widest">Upload New Photo</span>
+    `;
+
+    // Open in view mode
+    switchToViewMode();
+    document.getElementById('project-detail-modal').classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+}
+
+function closeProjectDetail() {
+    document.getElementById('project-detail-modal').classList.add('hidden');
+    document.body.style.overflow = 'auto';
+}
+
+function switchToEditMode() {
+    document.getElementById('pd-view-mode').classList.add('hidden');
+    document.getElementById('pd-edit-mode').classList.remove('hidden');
+    document.getElementById('pd-mode-label').innerHTML = '<i class="fas fa-pen-to-square"></i> <span>Edit Project</span>';
+}
+
+function switchToViewMode() {
+    document.getElementById('pd-view-mode').classList.remove('hidden');
+    document.getElementById('pd-edit-mode').classList.add('hidden');
+    document.getElementById('pd-mode-label').innerHTML = '<i class="fas fa-image"></i> <span>Project Details</span>';
+}
+
+function previewEditImage(input) {
+    if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            document.getElementById('pd-edit-preview').innerHTML = `<img src="${e.target.result}" class="w-full h-full object-cover rounded-[2rem]">`;
+        };
+        reader.readAsDataURL(input.files[0]);
+    }
+}
+
+function deleteProject() {
+    if (!confirm('Are you sure you want to delete this project? This cannot be undone.')) return;
+
+    const formData = new FormData();
+    formData.append('action', 'delete_portfolio');
+    formData.append('item_id', _currentProjectId);
+
+    fetch('ajax/manage_portfolio.php?t=' + Date.now(), {
+        method: 'POST',
+        body: formData
+    })
+    .then(r => r.json())
+    .then(result => {
+        if (result.success) {
+            closeProjectDetail();
+            location.reload();
+        } else {
+            alert(result.message || 'Delete failed.');
+        }
+    })
+    .catch(() => alert('Error. Please try again.'));
+}
+
+const pdEditForm = document.getElementById('pd-edit-form');
+if (pdEditForm) {
+    pdEditForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        const formData = new FormData(this);
+
+        const btn = this.querySelector('button[type="submit"]');
+        btn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> <span>Saving...</span>';
+        btn.disabled = true;
+
+        fetch('ajax/manage_portfolio.php?t=' + Date.now(), {
+            method: 'POST',
+            body: formData
+        })
+        .then(r => r.json())
+        .then(result => {
+            if (result.success) {
+                closeProjectDetail();
+                location.reload();
+            } else {
+                alert(result.message || 'Save failed. Please try again.');
+                btn.innerHTML = '<i class="fas fa-floppy-disk"></i> <span>Save Changes</span>';
+                btn.disabled = false;
+            }
+        })
+        .catch(() => {
+            alert('Error. Please try again.');
+            btn.innerHTML = '<i class="fas fa-floppy-disk"></i> <span>Save Changes</span>';
+            btn.disabled = false;
+        });
+    });
+}
 
 function uploadAvatar(input) {
     if (input.files && input.files[0]) {

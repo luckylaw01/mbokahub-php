@@ -19,17 +19,17 @@ include 'includes/header.php';
 
 <main class="max-w-7xl mx-auto px-4 md:px-6 py-8 md:py-12">
     <!-- Search Header & Input -->
-    <div class="max-w-3xl mx-auto text-center mb-10">
-        <h2 class="text-3xl md:text-4xl font-black text-slate-900 mb-4 tracking-tight">Search <span class="text-emerald-500">MbokaHub</span></h2>
-        <p class="text-slate-500 font-semibold mb-8 text-sm md:text-base">Find open jobs, project requests, and TVET certified experts instantly.</p>
+    <div class="max-w-3xl mx-auto text-center mb-4 md:mb-10">
+        <h2 class="text-xl md:text-4xl font-black text-slate-900 mb-2 md:mb-4 tracking-tight">Search <span class="text-emerald-500">MbokaHub</span></h2>
+        <p class="text-slate-500 font-semibold mb-4 md:mb-8 text-xs md:text-base">Find open jobs, project requests, and TVET certified experts instantly.</p>
         
-        <div class="relative max-w-2xl mx-auto shadow-2xl shadow-slate-100 rounded-3xl overflow-hidden border-2 border-slate-100 bg-white focus-within:border-emerald-500/20 transition-all p-2 flex items-center">
-            <div class="w-12 h-12 rounded-2xl flex items-center justify-center text-slate-400 text-lg">
+        <div class="relative max-w-2xl mx-auto shadow-xl md:shadow-2xl shadow-slate-100 rounded-2xl md:rounded-3xl overflow-hidden border-2 border-slate-100 bg-white focus-within:border-emerald-500/20 transition-all p-1.5 md:p-2 flex items-center">
+            <div class="w-8 h-8 md:w-12 md:h-12 rounded-xl md:rounded-2xl flex items-center justify-center text-slate-400 text-sm md:text-lg">
                 <i class="fas fa-search"></i>
             </div>
-            <input type="text" id="live-search-input" autofocus placeholder="Search jobs by name or location, or search artisans by skill..." 
-                   class="flex-1 bg-transparent px-2 py-4 text-sm font-bold text-slate-800 placeholder:text-slate-400 outline-none">
-            <button onclick="performSearch()" class="px-6 py-4 bg-slate-900 text-white rounded-2xl font-bold text-xs uppercase tracking-widest hover:bg-emerald-600 transition-all">
+            <input type="text" id="live-search-input" autofocus placeholder="Search jobs or artisans..." 
+                   class="flex-1 bg-transparent px-2 py-2 md:py-4 text-[11px] md:text-sm font-bold text-slate-800 placeholder:text-slate-400 outline-none w-full">
+            <button onclick="performSearch()" class="px-4 py-2.5 md:px-6 md:py-4 bg-slate-900 text-white rounded-xl md:rounded-2xl font-bold text-[9px] md:text-xs uppercase tracking-widest hover:bg-emerald-600 transition-all">
                 Search
             </button>
         </div>
@@ -51,12 +51,12 @@ include 'includes/header.php';
     </div>
 
     <!-- Results Area -->
-    <div id="search-initial-state" class="text-center py-20 bg-white rounded-[2.5rem] border border-slate-100 shadow-sm max-w-4xl mx-auto animate-in fade-in duration-300">
-        <div class="w-20 h-20 bg-slate-50 text-slate-300 rounded-3xl flex items-center justify-center mx-auto mb-6 text-3xl">
+    <div id="search-initial-state" class="text-center py-10 md:py-20 bg-white rounded-2xl md:rounded-[2.5rem] border border-slate-100 shadow-sm max-w-4xl mx-auto animate-in fade-in duration-300 mb-20">
+        <div class="w-12 h-12 md:w-20 md:h-20 bg-slate-50 text-slate-300 rounded-2xl md:rounded-3xl flex items-center justify-center mx-auto mb-4 md:mb-6 text-xl md:text-3xl">
             <i class="fas fa-search-plus"></i>
         </div>
-        <h3 class="text-xl font-black text-slate-900 mb-2">Type to Search</h3>
-        <p class="text-slate-400 font-bold text-xs max-w-sm mx-auto leading-relaxed uppercase tracking-wider">Start typing to search matching jobs, skills, locations, and experts in real-time.</p>
+        <h3 class="text-base md:text-xl font-black text-slate-900 mb-2">Type to Search</h3>
+        <p class="text-slate-400 font-bold text-[9px] md:text-xs max-w-sm mx-auto leading-relaxed uppercase tracking-wider px-4">Start typing to search matching jobs, skills, locations, and experts in real-time.</p>
     </div>
 
     <div id="search-results-container" class="hidden animate-in fade-in duration-500">
@@ -192,18 +192,18 @@ function renderResults(data) {
                 : '<span class="px-2 py-0.5 bg-slate-100 text-slate-500 rounded-lg text-[9px] font-black uppercase tracking-wider">Standard</span>';
             
             jobsList.innerHTML += `
-                <a href="get_job_details.php?id=${job.id}" class="block bg-white rounded-[2rem] border border-slate-100 p-6 hover:shadow-xl transition-all shadow-sm">
-                    <div class="flex items-center justify-between mb-3">
-                        <span class="text-[9px] font-black uppercase tracking-widest text-emerald-600">${job.cat_name || 'General'}</span>
+                <a href="get_job_details.php?id=${job.id}" class="block bg-white rounded-2xl md:rounded-[2rem] border border-slate-100 p-4 md:p-6 hover:shadow-xl transition-all shadow-sm">
+                    <div class="flex items-center justify-between mb-2 md:mb-3">
+                        <span class="text-[8px] md:text-[9px] font-black uppercase tracking-widest text-emerald-600">${job.cat_name || 'General'}</span>
                         <div class="flex gap-2">${urgencyBadge}</div>
                     </div>
-                    <h4 class="font-black text-slate-900 mb-2 text-base leading-snug">${job.title}</h4>
-                    <p class="text-xs text-slate-500 font-medium mb-4 line-clamp-2">${job.description}</p>
-                    <div class="flex items-center justify-between pt-3 border-t border-slate-50">
-                        <span class="text-[10px] font-bold text-slate-400 flex items-center gap-1.5">
+                    <h4 class="font-black text-slate-900 mb-1 md:mb-2 text-[11px] md:text-base leading-snug">${job.title}</h4>
+                    <p class="text-[9px] md:text-xs text-slate-500 font-medium mb-3 md:mb-4 line-clamp-2">${job.description}</p>
+                    <div class="flex items-center justify-between pt-2 md:pt-3 border-t border-slate-50">
+                        <span class="text-[8px] md:text-[10px] font-bold text-slate-400 flex items-center gap-1.5">
                             <i class="fas fa-location-dot"></i> ${job.location || 'Remote/TBD'}
                         </span>
-                        <span class="text-xs font-black text-slate-900 bg-slate-50 px-3 py-1 rounded-xl">Ksh ${Number(job.budget_range).toLocaleString()}</span>
+                        <span class="text-[10px] md:text-xs font-black text-slate-900 bg-slate-50 px-2 md:px-3 py-1 rounded-lg md:rounded-xl">Ksh ${Number(job.budget_range).toLocaleString()}</span>
                     </div>
                 </a>
             `;
@@ -237,24 +237,24 @@ function renderResults(data) {
             }
 
             artisansList.innerHTML += `
-                <a href="fundi/portfolio/index.php?id=${art.id}" class="block bg-white rounded-[2rem] border border-slate-100 p-6 hover:shadow-xl transition-all shadow-sm">
-                    <div class="flex items-start gap-4">
-                        <div class="w-14 h-14 rounded-2xl bg-slate-100 overflow-hidden shrink-0 shadow-sm border border-slate-50">
+                <a href="fundi/portfolio/index.php?id=${art.id}" class="block bg-white rounded-2xl md:rounded-[2rem] border border-slate-100 p-4 md:p-6 hover:shadow-xl transition-all shadow-sm">
+                    <div class="flex items-start gap-2 md:gap-4">
+                        <div class="w-10 h-10 md:w-14 md:h-14 rounded-lg md:rounded-2xl bg-slate-100 overflow-hidden shrink-0 shadow-sm border border-slate-50">
                             <img src="${avatar}" class="w-full h-full object-cover">
                         </div>
                         <div class="flex-1 min-w-0">
-                            <div class="flex items-center justify-between mb-1">
-                                <h4 class="font-black text-slate-900 text-sm truncate">${art.first_name} ${art.last_name}</h4>
-                                <div class="flex items-center gap-0.5 text-amber-400 text-[10px] shrink-0 font-bold">
+                            <div class="flex items-center justify-between mb-0.5 md:mb-1">
+                                <h4 class="font-black text-slate-900 text-[11px] md:text-sm truncate">${art.first_name} ${art.last_name}</h4>
+                                <div class="flex items-center gap-0.5 text-amber-400 text-[9px] md:text-[10px] shrink-0 font-bold">
                                     <i class="fas fa-star"></i> ${Number(art.rating).toFixed(1)}
                                 </div>
                             </div>
-                            <p class="text-[9px] font-black text-indigo-600 uppercase tracking-widest mb-2">${art.specialty || 'Expert'}</p>
-                            <p class="text-xs text-slate-400 line-clamp-2 mb-3 leading-relaxed">${art.bio || ''}</p>
+                            <p class="text-[8px] md:text-[9px] font-black text-indigo-600 uppercase tracking-widest mb-1 md:mb-2">${art.specialty || 'Expert'}</p>
+                            <p class="text-[9px] md:text-xs text-slate-400 line-clamp-2 mb-2 md:mb-3 leading-relaxed">${art.bio || ''}</p>
                             
-                            <div class="flex items-center justify-between pt-3 border-t border-slate-50">
+                            <div class="flex items-center justify-between pt-2 md:pt-3 border-t border-slate-50">
                                 <div class="flex gap-1 min-w-0 mr-2">${skillsPills}</div>
-                                <span class="text-[9px] font-bold text-slate-400 shrink-0 uppercase tracking-tighter">
+                                <span class="text-[8px] md:text-[9px] font-bold text-slate-400 shrink-0 uppercase tracking-tighter">
                                     <i class="fas fa-location-dot"></i> ${art.location || 'Kenya'}
                                 </span>
                             </div>

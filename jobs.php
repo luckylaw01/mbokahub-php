@@ -72,14 +72,14 @@ if ($user_role === 'fundi' || $user_role === 'contractor') {
 }
 ?>
 
-<main class="max-w-7xl mx-auto px-4 md:px-6 py-8">
+<main class="max-w-7xl mx-auto px-2 md:px-6 py-4 md:py-8 mb-24">
     <!-- Header Section -->
-    <div class="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-10">
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 md:gap-6 mb-4 md:mb-10">
         <div>
-            <h2 class="text-3xl font-black text-slate-900 tracking-tight">
+            <h2 class="text-xl md:text-3xl font-black text-slate-900 tracking-tight">
                 <?php echo ($user_role === 'fundi') ? 'Available Projects' : 'My Project Suite'; ?>
             </h2>
-            <p class="text-slate-500 font-semibold flex items-center gap-2 mt-1">
+            <p class="text-slate-500 font-semibold flex items-center gap-2 mt-1 text-xs md:text-base">
                 <?php if ($user_role === 'fundi'): ?>
                     <span class="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span>
                     Browse jobs that match your expertise
@@ -90,9 +90,9 @@ if ($user_role === 'fundi' || $user_role === 'contractor') {
         </div>
 
         <?php if ($user_role === 'hirer'): ?>
-        <a href="index.php" class="flex items-center gap-3 px-6 py-4 bg-slate-900 text-white rounded-2xl font-bold shadow-xl shadow-slate-200 hover:bg-slate-800 hover:-translate-y-1 transition-all active:scale-95 group">
-            <span class="w-8 h-8 bg-white/10 rounded-xl flex items-center justify-center group-hover:bg-white/20 transition-colors">
-                <i class="fas fa-plus"></i>
+        <a href="index.php" class="flex items-center gap-3 px-4 py-2 md:px-6 md:py-4 bg-slate-900 text-white rounded-xl md:rounded-2xl font-bold shadow-xl shadow-slate-200 hover:bg-slate-800 hover:-translate-y-1 transition-all active:scale-95 group text-sm md:text-base">
+            <span class="w-6 h-6 md:w-8 md:h-8 bg-white/10 rounded-lg md:rounded-xl flex items-center justify-center group-hover:bg-white/20 transition-colors">
+                <i class="fas fa-plus text-xs md:text-base"></i>
             </span>
             Post New Job
         </a>
@@ -100,15 +100,15 @@ if ($user_role === 'fundi' || $user_role === 'contractor') {
     </div>
 
     <!-- Discovery Bar -->
-    <div class="bg-white p-5 rounded-[2.5rem] shadow-sm border border-slate-100 mb-10 flex flex-col md:flex-row gap-4">
-        <form class="flex-1 flex flex-col md:flex-row gap-4" method="GET">
+    <div class="bg-white p-2 md:p-5 rounded-2xl md:rounded-[2.5rem] shadow-sm border border-slate-100 mb-4 md:mb-10 flex flex-col md:flex-row gap-2 md:gap-4">
+        <form class="flex-1 flex flex-col md:flex-row gap-2 md:gap-4" method="GET">
             <div class="flex-1 relative group">
-                <i class="fas fa-search absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-emerald-500 transition-colors"></i>
-                <input type="text" name="search" value="<?php echo htmlspecialchars($search); ?>" placeholder="Search projects, keywords..." class="w-full pl-14 pr-6 py-4 bg-slate-50 border-none rounded-2xl text-slate-900 font-bold placeholder:text-slate-400 focus:ring-2 focus:ring-emerald-500/20 transition-all">
+                <i class="fas fa-search absolute left-3 md:left-5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-emerald-500 transition-colors text-xs md:text-base"></i>
+                <input type="text" name="search" value="<?php echo htmlspecialchars($search); ?>" placeholder="Search projects..." class="w-full pl-8 md:pl-14 pr-4 md:pr-6 py-2 md:py-4 bg-slate-50 border-none rounded-xl md:rounded-2xl text-slate-900 font-bold placeholder:text-slate-400 focus:ring-2 focus:ring-emerald-500/20 transition-all text-xs md:text-base">
             </div>
             
             <div class="md:w-64 relative">
-                <select name="category" class="w-full pl-6 pr-12 py-4 bg-slate-50 border-none rounded-2xl text-slate-900 font-bold appearance-none focus:ring-2 focus:ring-emerald-500/20 cursor-pointer">
+                <select name="category" class="w-full pl-3 md:pl-6 pr-8 md:pr-12 py-2 md:py-4 bg-slate-50 border-none rounded-xl md:rounded-2xl text-slate-900 font-bold appearance-none focus:ring-2 focus:ring-emerald-500/20 cursor-pointer text-xs md:text-base">
                     <option value="">All Disciplines</option>
                     <?php foreach($categories as $cat): ?>
                         <option value="<?php echo $cat['id']; ?>" <?php echo $category_id == $cat['id'] ? 'selected' : ''; ?>>
@@ -116,67 +116,67 @@ if ($user_role === 'fundi' || $user_role === 'contractor') {
                         </option>
                     <?php endforeach; ?>
                 </select>
-                <i class="fas fa-chevron-down absolute right-6 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"></i>
+                <i class="fas fa-chevron-down absolute right-3 md:right-6 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none text-[10px] md:text-base"></i>
             </div>
 
-            <button type="submit" class="px-8 py-4 bg-emerald-500 text-white rounded-2xl font-black text-sm shadow-lg shadow-emerald-100 hover:bg-emerald-600 hover:-translate-y-0.5 transition-all">
-                Filter Results
+            <button type="submit" class="px-4 py-2 md:px-8 md:py-4 bg-emerald-500 text-white rounded-xl md:rounded-2xl font-black text-xs md:text-sm shadow-lg shadow-emerald-100 hover:bg-emerald-600 hover:-translate-y-0.5 transition-all">
+                Filter
             </button>
         </form>
     </div>
 
     <!-- Jobs Grid -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div class="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-2 md:gap-6">
         <?php if (empty($jobs)): ?>
-            <div class="col-span-full py-20 text-center">
-                <div class="w-20 h-20 bg-slate-100 text-slate-400 rounded-3xl flex items-center justify-center mx-auto mb-4">
-                    <i class="fas fa-folder-open text-3xl"></i>
+            <div class="col-span-full py-10 md:py-20 text-center">
+                <div class="w-12 h-12 md:w-20 md:h-20 bg-slate-100 text-slate-400 rounded-2xl md:rounded-3xl flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-folder-open text-xl md:text-3xl"></i>
                 </div>
-                <h3 class="text-xl font-bold text-slate-900">No projects found</h3>
-                <p class="text-slate-500 font-medium">Try adjusting your filters or search terms</p>
+                <h3 class="text-sm md:text-xl font-bold text-slate-900">No projects found</h3>
+                <p class="text-[10px] md:text-sm text-slate-500 font-medium">Try adjusting your filters or search terms</p>
             </div>
         <?php else: ?>
             <?php foreach($jobs as $job): ?>
-                <div class="bg-white rounded-[2.5rem] border border-slate-100 p-8 hover:shadow-2xl hover:shadow-slate-200/50 transition-all group flex flex-col h-full">
+                <div class="bg-white rounded-[1rem] md:rounded-[2.5rem] border border-slate-100 p-3 md:p-8 hover:shadow-2xl hover:shadow-slate-200/50 transition-all group flex flex-col h-full">
                     <!-- Category Badge -->
-                    <div class="flex items-center justify-between mb-6">
-                        <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 bg-emerald-50 text-emerald-500 rounded-xl flex items-center justify-center group-hover:bg-emerald-500 group-hover:text-white transition-colors">
-                                <i class="fas <?php echo $job['icon_class'] ?: 'fa-briefcase'; ?>"></i>
+                    <div class="flex items-center justify-between mb-2 md:mb-6">
+                        <div class="flex items-center gap-1 md:gap-3">
+                            <div class="w-6 h-6 md:w-10 md:h-10 bg-emerald-50 text-emerald-500 rounded-md md:rounded-xl flex items-center justify-center group-hover:bg-emerald-500 group-hover:text-white transition-colors">
+                                <i class="fas <?php echo $job['icon_class'] ?: 'fa-briefcase'; ?> text-[8px] md:text-base"></i>
                             </div>
-                            <span class="text-[10px] font-black uppercase tracking-widest text-slate-400"><?php echo htmlspecialchars($job['cat_name'] ?: 'General'); ?></span>
+                            <span class="text-[8px] md:text-[10px] font-black uppercase tracking-widest text-slate-400 truncate w-16 md:w-auto"><?php echo htmlspecialchars($job['cat_name'] ?: 'General'); ?></span>
                         </div>
                         <?php if($job['urgency'] === 'emergency'): ?>
-                            <span class="bg-rose-50 text-rose-500 px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-tighter border border-rose-100 animate-pulse">Emergency</span>
+                            <span class="bg-rose-50 text-rose-500 px-1.5 py-0.5 md:px-3 md:py-1 rounded-full text-[7px] md:text-[9px] font-black uppercase tracking-tighter border border-rose-100 animate-pulse">Emergency</span>
                         <?php endif; ?>
                     </div>
 
-                    <h3 class="text-xl font-black text-slate-900 mb-3 leading-tight group-hover:text-emerald-600 transition-colors"><?php echo htmlspecialchars($job['title']); ?></h3>
-                    <p class="text-slate-500 text-sm font-medium line-clamp-3 mb-6"><?php echo htmlspecialchars($job['description']); ?></p>
+                    <h3 class="text-[11px] md:text-xl font-black text-slate-900 mb-1 md:mb-3 leading-tight group-hover:text-emerald-600 transition-colors line-clamp-2 md:line-clamp-none"><?php echo htmlspecialchars($job['title']); ?></h3>
+                    <p class="text-slate-500 text-[9px] md:text-sm font-medium line-clamp-2 md:line-clamp-3 mb-2 md:mb-6"><?php echo htmlspecialchars($job['description']); ?></p>
 
-                    <div class="mt-auto space-y-4">
-                        <div class="flex items-center justify-between pt-6 border-t border-slate-50">
+                    <div class="mt-auto space-y-2 md:space-y-4">
+                        <div class="flex items-center justify-between pt-2 md:pt-6 border-t border-slate-50">
                             <div>
-                                <p class="text-[10px] font-black uppercase text-slate-400 tracking-tighter">Budget</p>
-                                <p class="text-lg font-black text-slate-900">Ksh <?php echo number_format($job['budget_range']); ?></p>
+                                <p class="text-[8px] md:text-[10px] font-black uppercase text-slate-400 tracking-tighter">Budget</p>
+                                <p class="text-[11px] md:text-lg font-black text-slate-900">Ksh <?php echo number_format($job['budget_range']); ?></p>
                             </div>
                             <div class="text-right">
-                                <p class="text-[10px] font-black uppercase text-slate-400 tracking-tighter">Location</p>
-                                <p class="text-sm font-bold text-slate-900"><?php echo htmlspecialchars($job['location']); ?></p>
+                                <p class="text-[8px] md:text-[10px] font-black uppercase text-slate-400 tracking-tighter">Location</p>
+                                <p class="text-[9px] md:text-sm font-bold text-slate-900 truncate w-12 md:w-auto"><?php echo htmlspecialchars($job['location']); ?></p>
                             </div>
                         </div>
 
                         <?php if ($user_role === 'fundi'): ?>
-                            <a href="get_job_details.php?id=<?php echo $job['id']; ?>" class="block w-full text-center py-4 bg-slate-900 text-white rounded-2xl font-black text-sm hover:bg-emerald-600 shadow-xl shadow-slate-100 transition-all">
-                                View Details & Bid
+                            <a href="get_job_details.php?id=<?php echo $job['id']; ?>" class="block w-full text-center py-2 md:py-4 bg-slate-900 text-white rounded-lg md:rounded-2xl font-black text-[9px] md:text-sm hover:bg-emerald-600 shadow-md md:shadow-xl shadow-slate-100 transition-all">
+                                View <span class="hidden md:inline">& Bid</span>
                             </a>
                         <?php else: ?>
-                            <div class="flex items-center justify-between gap-3">
-                                <span class="px-4 py-2 bg-slate-50 text-slate-600 rounded-xl text-xs font-bold border border-slate-100 capitalize">
-                                    Status: <?php echo str_replace('_', ' ', $job['status']); ?>
+                            <div class="flex flex-col md:flex-row items-center justify-between gap-1 md:gap-3">
+                                <span class="px-2 py-1 md:px-4 md:py-2 bg-slate-50 text-slate-600 rounded-md md:rounded-xl text-[8px] md:text-xs font-bold border border-slate-100 capitalize w-full text-center md:w-auto">
+                                    <?php echo str_replace('_', ' ', $job['status']); ?>
                                 </span>
-                                <a href="get_job_details.php?id=<?php echo $job['id']; ?>" class="px-5 py-2 bg-indigo-50 text-indigo-600 rounded-xl text-xs font-black hover:bg-indigo-600 hover:text-white transition-all">
-                                    Manage (<?php echo $job['bid_count']; ?> Bids)
+                                <a href="get_job_details.php?id=<?php echo $job['id']; ?>" class="w-full text-center px-2 py-1.5 md:px-5 md:py-2 bg-indigo-50 text-indigo-600 rounded-md md:rounded-xl text-[9px] md:text-xs font-black hover:bg-indigo-600 hover:text-white transition-all">
+                                    Manage <span class="hidden md:inline">(<?php echo $job['bid_count']; ?>)</span>
                                 </a>
                             </div>
                         <?php endif; ?>

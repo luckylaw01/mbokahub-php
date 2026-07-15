@@ -134,6 +134,25 @@ include 'includes/header.php';
 
     <main class="max-w-7xl mx-auto px-4 md:px-6 py-6 md:py-10">
         
+        <?php if ($is_logged_in): ?>
+        <!-- Personalized Greeting for Kenyan Audience -->
+        <div class="mb-8 md:mb-12 bg-gradient-to-br from-emerald-600 via-emerald-700 to-slate-900 rounded-[2.5rem] p-6 md:p-10 text-white relative overflow-hidden shadow-2xl shadow-emerald-900/20">
+            <div class="absolute top-0 right-0 w-64 h-64 bg-white opacity-5 blur-3xl -mr-32 -mt-32"></div>
+            <div class="absolute bottom-0 left-0 w-40 h-40 bg-emerald-400 opacity-20 blur-2xl -ml-20 -mb-20"></div>
+            
+            <div class="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 md:gap-6">
+                <div>
+                    <h2 class="text-3xl md:text-5xl font-black mb-1 md:mb-2 tracking-tight">Habari, <?php echo htmlspecialchars(explode(' ', $user_name)[0]); ?>! 👋</h2>
+                    <p class="text-emerald-100 font-medium text-xs md:text-base">Karibu! Here's what's happening on your MbokaHub dashboard today.</p>
+                </div>
+                <div class="text-left md:text-right bg-black/20 backdrop-blur-md px-5 py-3 rounded-2xl border border-white/10 shadow-inner">
+                    <p class="text-[9px] uppercase tracking-widest text-emerald-200 font-black mb-0.5"><?php echo date("l, d M Y"); ?></p>
+                    <p class="text-sm md:text-lg font-black text-white"><?php echo $user_role === 'fundi' ? 'Expert Dashboard' : 'Client Dashboard'; ?></p>
+                </div>
+            </div>
+        </div>
+        <?php endif; ?>
+
         <!-- 3.4. Stories / Spotlight Bar -->
         <section class="mb-10 lg:mb-16">
             <div class="flex items-center justify-between mb-5 px-1 md:px-2">
@@ -205,29 +224,29 @@ include 'includes/header.php';
         <!-- Dashboard Containers -->
         <div id="hirer-view" class="<?php echo $initial_view === 'work' ? 'hidden' : ''; ?>">
             <!-- 3.3. Hero/Search Banner -->
-            <section class="relative mb-12 md:mb-20">
+            <section class="relative mb-6 md:mb-20">
                 <div class="absolute -top-10 -left-10 w-40 h-40 bg-emerald-300/20 rounded-full blur-3xl animate-pulse"></div>
                 
-                <div class="relative bg-white p-8 md:p-20 rounded-[2.5rem] md:rounded-[3rem] shadow-2xl shadow-slate-200 overflow-hidden text-center border border-slate-50">
-                    <h2 class="text-3xl md:text-6xl font-extrabold mb-6 md:mb-8 tracking-tight text-slate-900 leading-tight">
+                <div class="relative bg-white p-4 md:p-20 rounded-2xl md:rounded-[3rem] shadow-2xl shadow-slate-200 overflow-hidden text-center border border-slate-50">
+                    <h2 class="text-xl md:text-6xl font-extrabold mb-4 md:mb-8 tracking-tight text-slate-900 leading-tight">
                         <?php echo $t['hero_title']; ?>
                     </h2>
                     <form action="index.php" method="GET" class="relative max-w-3xl mx-auto">
-                        <i class="fas fa-search absolute left-6 md:left-8 top-1/2 -translate-y-1/2 text-slate-400 text-base md:text-lg"></i>
+                        <i class="fas fa-search absolute left-4 md:left-8 top-1/2 -translate-y-1/2 text-slate-400 text-xs md:text-lg"></i>
                         <input type="text" name="search" placeholder="<?php echo $t['search_placeholder']; ?>" 
                                value="<?php echo htmlspecialchars($_GET['search'] ?? ''); ?>"
-                               class="w-full bg-slate-50 rounded-[1.5rem] md:rounded-[2rem] px-12 md:px-16 py-5 md:py-7 text-sm md:text-lg border-2 border-transparent focus:border-emerald-500/30 focus:outline-none shadow-inner transition-all">
+                               class="w-full bg-slate-50 rounded-xl md:rounded-[2rem] pl-10 md:pl-16 pr-4 md:px-16 py-3 md:py-7 text-xs md:text-lg border-2 border-transparent focus:border-emerald-500/30 focus:outline-none shadow-inner transition-all">
                         <button type="submit" class="hidden md:block absolute right-4 top-1/2 -translate-y-1/2 bg-slate-900 text-white px-10 py-4 rounded-[1.5rem] font-bold hover:scale-105 active:scale-95 transition-all shadow-lg">
                             <?php echo $t['search_btn']; ?>
                         </button>
                     </form>
                     <?php if ($is_logged_in && $_SESSION['role'] === 'hirer'): ?>
-                    <button onclick="openPostJobWizard()" class="mt-6 md:mt-10 inline-flex items-center gap-3 bg-emerald-500 text-white px-8 py-4 rounded-2xl font-bold shadow-xl shadow-emerald-200 hover:bg-emerald-600 hover:scale-105 active:scale-95 transition-all">
+                    <button onclick="openPostJobWizard()" class="mt-4 md:mt-10 inline-flex items-center gap-2 md:gap-3 bg-emerald-500 text-white px-4 py-2 md:px-8 md:py-4 rounded-xl md:rounded-2xl font-bold text-xs md:text-base shadow-xl shadow-emerald-200 hover:bg-emerald-600 hover:scale-105 active:scale-95 transition-all">
                         <i class="fas fa-plus-circle"></i>
                         <?php echo $t['post_job']; ?>
                     </button>
                     <?php endif; ?>
-                    <button class="md:hidden w-full mt-4 bg-slate-900 text-white py-4 rounded-2xl font-bold shadow-lg">
+                    <button class="md:hidden w-full mt-3 bg-slate-900 text-white py-3 rounded-xl text-xs font-bold shadow-lg">
                         <?php echo $t['search_btn']; ?> Expert
                     </button>
                 </div>
@@ -240,13 +259,13 @@ include 'includes/header.php';
                     <a href="#" class="text-xs md:text-sm font-bold text-emerald-600 hover:underline tracking-tight"><?php echo $t['view_all']; ?></a>
                 </div>
                 
-                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 md:gap-6">
+                <div class="grid grid-cols-3 sm:grid-cols-3 md:grid-cols-5 gap-2 md:gap-6">
                     <?php foreach ($categories as $cat): ?>
-                    <a href="index.php?category=<?php echo $cat['id']; ?>" class="bg-white p-5 md:p-8 rounded-[1.5rem] md:rounded-[2.5rem] border border-slate-100 <?php echo (isset($_GET['category']) && $_GET['category'] == $cat['id']) ? 'border-emerald-500 bg-emerald-50/30' : 'hover:border-emerald-200 hover:shadow-xl hover:shadow-emerald-500/5'; ?> transition-all group cursor-pointer text-center">
-                        <div class="w-12 h-12 md:w-16 md:h-16 <?php echo (isset($_GET['category']) && $_GET['category'] == $cat['id']) ? 'bg-emerald-500 text-white' : 'bg-slate-50'; ?> rounded-xl md:rounded-2xl flex items-center justify-center mx-auto mb-3 md:mb-6 group-hover:bg-emerald-500 group-hover:text-white transition-all">
-                            <i class="fas <?php echo htmlspecialchars($cat['icon_class']); ?> text-xl md:text-2xl"></i>
+                    <a href="index.php?category=<?php echo $cat['id']; ?>" class="bg-white p-3 md:p-8 rounded-2xl md:rounded-[2.5rem] border border-slate-100 <?php echo (isset($_GET['category']) && $_GET['category'] == $cat['id']) ? 'border-emerald-500 bg-emerald-50/30' : 'hover:border-emerald-200 hover:shadow-xl hover:shadow-emerald-500/5'; ?> transition-all group cursor-pointer text-center">
+                        <div class="w-8 h-8 md:w-16 md:h-16 <?php echo (isset($_GET['category']) && $_GET['category'] == $cat['id']) ? 'bg-emerald-500 text-white' : 'bg-slate-50'; ?> rounded-lg md:rounded-2xl flex items-center justify-center mx-auto mb-2 md:mb-6 group-hover:bg-emerald-500 group-hover:text-white transition-all">
+                            <i class="fas <?php echo htmlspecialchars($cat['icon_class']); ?> text-sm md:text-2xl"></i>
                         </div>
-                        <span class="font-bold text-xs md:text-sm text-slate-800 transition-colors group-hover:text-emerald-600 leading-tight">
+                        <span class="font-bold text-[9px] md:text-sm text-slate-800 transition-colors group-hover:text-emerald-600 leading-tight">
                             <?php echo htmlspecialchars($cat['name_'.$current_lang]); ?>
                         </span>
                     </a>
@@ -263,45 +282,45 @@ include 'includes/header.php';
                     </button>
                 </div>
 
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6" id="fundi-feed">
+                <div class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-6" id="fundi-feed">
                     <?php if (empty($feed_items) && $initial_view === 'hire'): ?>
-                        <div class="col-span-full py-20 text-center bg-white rounded-[2rem] border-2 border-dashed border-slate-200">
-                            <i class="fas fa-user-tie text-4xl text-slate-300 mb-4"></i>
-                            <p class="text-slate-500 font-medium font-bold">Looking for experts...</p>
+                        <div class="col-span-full py-10 md:py-20 text-center bg-white rounded-2xl md:rounded-[2rem] border-2 border-dashed border-slate-200">
+                            <i class="fas fa-user-tie text-2xl md:text-4xl text-slate-300 mb-4"></i>
+                            <p class="text-slate-500 text-xs md:text-base font-bold">Looking for experts...</p>
                         </div>
                     <?php elseif ($initial_view === 'hire'): ?>
                         <?php foreach ($feed_items as $fundi): ?>
-                        <div class="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-xl shadow-slate-200/40 hover:scale-[1.02] transition-all cursor-pointer group animate-in slide-in-from-bottom-4">
-                            <div class="flex items-start justify-between mb-6">
-                                <div class="flex items-center gap-4">
-                                    <div class="w-14 h-14 vibrant-gradient rounded-2xl flex items-center justify-center text-white text-xl font-bold shadow-lg">
+                        <div class="bg-white p-3 md:p-6 rounded-2xl md:rounded-[2rem] border border-slate-100 shadow-xl shadow-slate-200/40 hover:scale-[1.02] transition-all cursor-pointer group animate-in slide-in-from-bottom-4 flex flex-col h-full">
+                            <div class="flex items-start justify-between mb-3 md:mb-6">
+                                <div class="flex items-center gap-2 md:gap-4">
+                                    <div class="w-8 h-8 md:w-14 md:h-14 vibrant-gradient rounded-lg md:rounded-2xl flex items-center justify-center text-white text-sm md:text-xl font-bold shadow-lg">
                                         <?php echo substr($fundi['first_name'], 0, 1); ?>
                                     </div>
                                     <div>
-                                        <h4 class="font-bold text-slate-900 group-hover:text-emerald-600 transition-colors"><?php echo htmlspecialchars($fundi['first_name'] . ' ' . $fundi['last_name']); ?></h4>
-                                        <div class="text-[10px] font-black uppercase text-emerald-500 tracking-wider">
+                                        <h4 class="font-bold text-[11px] md:text-base text-slate-900 group-hover:text-emerald-600 transition-colors"><?php echo htmlspecialchars($fundi['first_name'] . ' ' . $fundi['last_name']); ?></h4>
+                                        <div class="text-[8px] md:text-[10px] font-black uppercase text-emerald-500 tracking-wider">
                                             <?php echo htmlspecialchars($fundi['specialization']); ?>
                                         </div>
-                                        <div class="mt-1">
+                                        <div class="mt-0.5 md:mt-1 scale-[0.8] origin-left md:scale-100">
                                             <?php echo renderRating($fundi['rating']); ?>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                             
-                            <div class="flex items-center gap-2 text-slate-500 text-[10px] md:text-xs mb-6 font-medium">
-                                <span class="bg-slate-50 px-3 py-1.5 rounded-lg flex items-center gap-1.5">
+                            <div class="flex flex-col md:flex-row md:items-center gap-1 md:gap-2 text-slate-500 text-[8px] md:text-xs mb-3 md:mb-6 font-medium mt-auto">
+                                <span class="bg-slate-50 px-2 py-1 md:px-3 md:py-1.5 rounded-md md:rounded-lg flex items-center gap-1.5 w-fit">
                                     <i class="fas fa-location-dot text-emerald-500"></i>
                                     <?php echo htmlspecialchars($fundi['location']); ?>
                                 </span>
-                                <span class="bg-slate-50 px-3 py-1.5 rounded-lg flex items-center gap-1.5">
+                                <span class="bg-slate-50 px-2 py-1 md:px-3 md:py-1.5 rounded-md md:rounded-lg flex items-center gap-1.5 w-fit">
                                     <i class="fas fa-certificate text-blue-500"></i>
                                     <?php echo $t['verified']; ?>
                                 </span>
                             </div>
 
                             <button onclick="openFundiModal(<?php echo (int)$fundi['user_id']; ?>)" 
-                                    class="w-full py-4 bg-slate-900 text-white rounded-xl font-bold text-sm shadow-xl hover:bg-emerald-600 transition-all">
+                                    class="w-full py-2 md:py-4 bg-slate-900 text-white rounded-lg md:rounded-xl font-bold text-[9px] md:text-sm shadow-md md:shadow-xl hover:bg-emerald-600 transition-all mt-auto">
                                 <?php echo $t['view_portfolio']; ?>
                             </button>
                         </div>
@@ -313,39 +332,42 @@ include 'includes/header.php';
 
         <!-- 3.2. Fundi View (Work Dashboard) -->
         <div id="fundi-view" class="<?php echo $initial_view === 'hire' ? 'hidden' : ''; ?>">
-            <!-- Fundi Stats Row -->
+            <!-- Fundi Stats Row (Vibrant Redesign) -->
             <section class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 md:gap-6 mb-8 md:mb-12">
-                <div class="bg-white p-6 md:p-8 rounded-[2rem] md:rounded-[2.5rem] border border-slate-100 shadow-xl shadow-slate-200/50">
-                    <div class="flex items-center gap-4 mb-2 md:mb-4">
-                        <div class="w-10 h-10 md:w-12 md:h-12 bg-emerald-100 text-emerald-600 rounded-xl md:rounded-2xl flex items-center justify-center">
+                <div class="bg-gradient-to-br from-emerald-500 to-emerald-700 p-6 md:p-8 rounded-[2rem] md:rounded-[2.5rem] shadow-xl shadow-emerald-600/30 text-white relative overflow-hidden">
+                    <div class="absolute -right-4 -top-4 w-32 h-32 bg-white opacity-10 rounded-full blur-xl"></div>
+                    <div class="flex items-center gap-4 mb-2 md:mb-4 relative z-10">
+                        <div class="w-10 h-10 md:w-12 md:h-12 bg-white/20 backdrop-blur-sm rounded-xl md:rounded-2xl flex items-center justify-center border border-white/20">
                             <i class="fas fa-briefcase text-base md:text-xl"></i>
                         </div>
-                        <h4 class="font-bold text-slate-500 uppercase tracking-widest text-[10px] md:text-xs"><?php echo $t['active_jobs']; ?></h4>
+                        <h4 class="font-black uppercase tracking-widest text-[10px] md:text-xs text-emerald-100"><?php echo $t['active_jobs']; ?></h4>
                     </div>
-                    <p class="text-3xl md:text-4xl font-extrabold text-slate-900">12</p>
-                    <p class="text-xs md:text-sm text-emerald-500 font-bold mt-1 md:mt-2">+2 since today</p>
+                    <p class="text-3xl md:text-4xl font-black relative z-10">12</p>
+                    <p class="text-xs md:text-sm text-emerald-200 font-bold mt-1 md:mt-2 relative z-10">+2 since today</p>
                 </div>
                 
-                <div class="bg-white p-6 md:p-8 rounded-[2rem] md:rounded-[2.5rem] border border-slate-100 shadow-xl shadow-slate-200/50">
-                    <div class="flex items-center gap-4 mb-2 md:mb-4">
-                        <div class="w-10 h-10 md:w-12 md:h-12 bg-blue-100 text-blue-600 rounded-xl md:rounded-2xl flex items-center justify-center">
-                            <i class="fas fa-wallet text-base md:text-xl"></i>
+                <div class="bg-gradient-to-br from-slate-800 to-slate-950 p-6 md:p-8 rounded-[2rem] md:rounded-[2.5rem] shadow-xl shadow-slate-900/30 text-white relative overflow-hidden">
+                    <div class="absolute -right-4 -bottom-4 w-32 h-32 bg-emerald-500 opacity-20 rounded-full blur-xl"></div>
+                    <div class="flex items-center gap-4 mb-2 md:mb-4 relative z-10">
+                        <div class="w-10 h-10 md:w-12 md:h-12 bg-white/10 backdrop-blur-sm rounded-xl md:rounded-2xl flex items-center justify-center border border-white/10">
+                            <i class="fas fa-wallet text-base md:text-xl text-emerald-400"></i>
                         </div>
-                        <h4 class="font-bold text-slate-500 uppercase tracking-widest text-[10px] md:text-xs"><?php echo $t['earnings']; ?></h4>
+                        <h4 class="font-black uppercase tracking-widest text-[10px] md:text-xs text-slate-400"><?php echo $t['earnings']; ?></h4>
                     </div>
-                    <p class="text-3xl md:text-4xl font-extrabold text-slate-900">KES 4.2k</p>
-                    <p class="text-[10px] md:text-sm text-slate-400 font-medium mt-1 md:mt-2">Available for withdrawal</p>
+                    <p class="text-3xl md:text-4xl font-black relative z-10 text-emerald-400">KES 4.2k</p>
+                    <p class="text-[10px] md:text-sm text-slate-400 font-bold mt-1 md:mt-2 relative z-10">Available for withdrawal</p>
                 </div>
 
-                <div class="sm:col-span-2 md:col-span-1 bg-white p-6 md:p-8 rounded-[2rem] md:rounded-[2.5rem] border border-slate-100 shadow-xl shadow-slate-200/50">
-                    <div class="flex items-center gap-4 mb-2 md:mb-4">
-                        <div class="w-10 h-10 md:w-12 md:h-12 bg-amber-100 text-amber-600 rounded-xl md:rounded-2xl flex items-center justify-center">
+                <div class="sm:col-span-2 md:col-span-1 bg-gradient-to-br from-amber-400 to-orange-500 p-6 md:p-8 rounded-[2rem] md:rounded-[2.5rem] shadow-xl shadow-amber-500/30 text-white relative overflow-hidden">
+                    <div class="absolute -left-4 -bottom-4 w-32 h-32 bg-white opacity-20 rounded-full blur-xl"></div>
+                    <div class="flex items-center gap-4 mb-2 md:mb-4 relative z-10">
+                        <div class="w-10 h-10 md:w-12 md:h-12 bg-white/20 backdrop-blur-sm rounded-xl md:rounded-2xl flex items-center justify-center border border-white/20">
                             <i class="fas fa-star text-base md:text-xl"></i>
                         </div>
-                        <h4 class="font-bold text-slate-500 uppercase tracking-widest text-[10px] md:text-xs"><?php echo $t['trust_index']; ?></h4>
+                        <h4 class="font-black uppercase tracking-widest text-[10px] md:text-xs text-amber-100"><?php echo $t['trust_index']; ?></h4>
                     </div>
-                    <p class="text-3xl md:text-4xl font-extrabold text-slate-900">4.9</p>
-                    <p class="text-[10px] md:text-sm text-slate-400 font-medium mt-1 md:mt-2">Based on 84 reviews</p>
+                    <p class="text-3xl md:text-4xl font-black relative z-10">4.9</p>
+                    <p class="text-[10px] md:text-sm text-amber-100 font-bold mt-1 md:mt-2 relative z-10">Based on 84 reviews</p>
                 </div>
             </section>
 
@@ -358,28 +380,28 @@ include 'includes/header.php';
                     </button>
                 </div>
 
-                <div class="space-y-4 md:space-y-6">
+                <div class="space-y-3 md:space-y-6">
                     <?php if (empty($feed_items) && $initial_view === 'work'): ?>
-                        <div class="py-20 text-center bg-slate-50 rounded-[2rem] border-2 border-dashed border-slate-200">
-                            <i class="fas fa-hammer text-4xl text-slate-300 mb-5"></i>
-                            <p class="text-slate-500 font-bold">No jobs available right now.</p>
+                        <div class="py-10 md:py-20 text-center bg-slate-50 rounded-2xl md:rounded-[2rem] border-2 border-dashed border-slate-200">
+                            <i class="fas fa-hammer text-2xl md:text-4xl text-slate-300 mb-3 md:mb-5"></i>
+                            <p class="text-slate-500 text-xs md:text-base font-bold">No jobs available right now.</p>
                         </div>
                     <?php elseif ($initial_view === 'work'): ?>
                         <?php foreach ($feed_items as $job): ?>
-                        <div class="group flex flex-col items-stretch p-5 md:p-8 rounded-[2rem] bg-slate-50 border-2 border-transparent hover:border-emerald-500/20 transition-all animate-in slide-in-from-bottom-6">
-                            <div class="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-6">
-                                <div class="flex items-center gap-6">
-                                    <div class="w-14 h-14 md:w-20 md:h-20 bg-white rounded-2xl md:rounded-[2.5rem] shadow-xl shadow-slate-200/50 flex items-center justify-center shrink-0">
-                                        <i class="fas <?php echo htmlspecialchars($job['icon_class']); ?> text-2xl md:text-3xl text-emerald-500"></i>
+                        <div class="group flex flex-col items-stretch p-3 md:p-8 rounded-2xl md:rounded-[2rem] bg-slate-50 border-2 border-transparent hover:border-emerald-500/20 transition-all animate-in slide-in-from-bottom-6">
+                            <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 md:gap-6 mb-3 md:mb-6">
+                                <div class="flex items-center gap-3 md:gap-6">
+                                    <div class="w-10 h-10 md:w-20 md:h-20 bg-white rounded-xl md:rounded-[2.5rem] shadow-md md:shadow-xl shadow-slate-200/50 flex items-center justify-center shrink-0">
+                                        <i class="fas <?php echo htmlspecialchars($job['icon_class']); ?> text-lg md:text-3xl text-emerald-500"></i>
                                     </div>
                                     <div class="flex-1 min-w-0">
-                                        <div class="flex items-center gap-3 mb-1.5">
-                                            <h5 class="font-bold text-base md:text-xl text-slate-800 truncate"><?php echo htmlspecialchars($job['title']); ?></h5>
+                                        <div class="flex items-center gap-2 md:gap-3 mb-1 md:mb-1.5">
+                                            <h5 class="font-bold text-[11px] md:text-xl text-slate-800 truncate"><?php echo htmlspecialchars($job['title']); ?></h5>
                                             <?php if ($job['urgency'] === 'emergency'): ?>
-                                                <span class="bg-rose-100 text-rose-600 px-3 py-1 rounded-full text-[9px] md:text-[10px] font-black uppercase tracking-tighter animate-pulse"><?php echo $t['emergency']; ?></span>
+                                                <span class="bg-rose-100 text-rose-600 px-2 py-0.5 md:px-3 md:py-1 rounded-full text-[7px] md:text-[10px] font-black uppercase tracking-tighter animate-pulse"><?php echo $t['emergency']; ?></span>
                                             <?php endif; ?>
                                         </div>
-                                        <p class="text-slate-500 text-xs md:text-sm font-medium flex items-center gap-2">
+                                        <p class="text-slate-500 text-[9px] md:text-sm font-medium flex items-center gap-1 md:gap-2">
                                             <i class="fas fa-location-dot text-slate-400"></i>
                                             <?php echo htmlspecialchars($job['location']); ?> 
                                             <span class="text-slate-200">•</span>
@@ -388,26 +410,26 @@ include 'includes/header.php';
                                         </p>
                                     </div>
                                 </div>
-                                <div class="flex items-center gap-3">
+                                <div class="flex items-center gap-2 md:gap-3">
                                     <button onclick="openJobModal(<?php echo (int)$job['id']; ?>)"
-                                            class="flex-1 md:flex-none bg-white text-slate-900 px-6 py-4 rounded-xl font-bold text-xs md:text-sm shadow-sm hover:bg-slate-900 hover:text-white transition-all text-center">
+                                            class="flex-1 md:flex-none bg-white text-slate-900 px-3 py-2 md:px-6 md:py-4 rounded-lg md:rounded-xl font-bold text-[9px] md:text-sm shadow-sm hover:bg-slate-900 hover:text-white transition-all text-center">
                                         <?php echo $t['view_details']; ?>
                                     </button>
                                     <?php if (isset($job['user_bid_id']) && $job['user_bid_id']): ?>
                                         <button disabled 
-                                                class="flex-1 md:flex-none bg-slate-100 text-slate-400 px-8 py-4 rounded-xl font-bold text-xs md:text-sm cursor-not-allowed text-center">
-                                            <i class="fas fa-check-circle mr-2"></i>Applied
+                                                class="flex-1 md:flex-none bg-slate-100 text-slate-400 px-4 py-2 md:px-8 md:py-4 rounded-lg md:rounded-xl font-bold text-[9px] md:text-sm cursor-not-allowed text-center">
+                                            <i class="fas fa-check-circle mr-1 md:mr-2"></i>Applied
                                         </button>
                                     <?php else: ?>
                                         <button onclick="openJobModal(<?php echo (int)$job['id']; ?>)" 
-                                                class="flex-1 md:flex-none bg-emerald-500 text-white px-8 py-4 rounded-xl font-bold text-xs md:text-sm shadow-xl shadow-emerald-200 hover:bg-emerald-600 hover:scale-105 active:scale-95 transition-all text-center">
+                                                class="flex-1 md:flex-none bg-emerald-500 text-white px-4 py-2 md:px-8 md:py-4 rounded-lg md:rounded-xl font-bold text-[9px] md:text-sm shadow-md md:shadow-xl shadow-emerald-200 hover:bg-emerald-600 hover:scale-105 active:scale-95 transition-all text-center">
                                             <?php echo $t['place_bid']; ?>
                                         </button>
                                     <?php endif; ?>
                                 </div>
                             </div>
-                            <div class="bg-white/50 p-4 md:p-5 rounded-2xl">
-                                <p class="text-[11px] md:text-xs text-slate-600 font-medium italic leading-relaxed">
+                            <div class="bg-white/50 p-3 md:p-5 rounded-xl md:rounded-2xl">
+                                <p class="text-[9px] md:text-xs text-slate-600 font-medium italic leading-relaxed line-clamp-2 md:line-clamp-none">
                                     "<?php echo htmlspecialchars(substr($job['description'], 0, 120)) . '...'; ?>"
                                 </p>
                             </div>

@@ -1,20 +1,23 @@
     <!-- Mobile Bottom Navigation -->
     <div class="md:hidden mobile-bottom-nav">
-        <div class="bg-slate-900/90 backdrop-blur-xl rounded-full p-2 flex justify-between items-center border border-white/10 shadow-2xl">
-            <a href="index.php" class="w-14 h-14 <?php echo basename($_SERVER['PHP_SELF']) === 'index.php' ? 'bg-white text-emerald-600' : 'text-slate-400'; ?> rounded-full flex items-center justify-center shadow-lg transition-transform active:scale-90">
-                <i class="fas fa-home text-lg"></i>
+        <div class="bg-slate-900/95 backdrop-blur-xl rounded-[2rem] p-1 flex justify-between items-center border border-white/10 shadow-2xl mx-4 mb-4">
+            <a href="index.php" class="flex-1 flex flex-col items-center justify-center py-1.5 <?php echo basename($_SERVER['PHP_SELF']) === 'index.php' ? 'bg-white text-emerald-600 rounded-[1.5rem]' : 'text-slate-400 hover:text-white'; ?> transition-all active:scale-95">
+                <i class="fas fa-home text-sm mb-0.5"></i>
+                <span class="text-[8px] font-bold uppercase tracking-widest">Home</span>
             </a>
-            <a href="search.php" 
-               class="w-14 h-14 <?php echo basename($_SERVER['PHP_SELF']) === 'search.php' ? 'bg-white text-emerald-600' : 'text-slate-400'; ?> rounded-full flex items-center justify-center shadow-lg transition-transform active:scale-95">
-                <i class="fas fa-search text-lg"></i>
+            <a href="search.php" class="flex-1 flex flex-col items-center justify-center py-1.5 <?php echo basename($_SERVER['PHP_SELF']) === 'search.php' ? 'bg-white text-emerald-600 rounded-[1.5rem]' : 'text-slate-400 hover:text-white'; ?> transition-all active:scale-95">
+                <i class="fas fa-search text-sm mb-0.5"></i>
+                <span class="text-[8px] font-bold uppercase tracking-widest">Search</span>
             </a>
-            <button onclick="switchView('work')" 
-                    class="w-14 h-14 text-slate-400 flex items-center justify-center transition-transform active:scale-95">
-                <i class="fas fa-briefcase text-lg"></i>
-            </button>
-            <a href="profile.php" 
-               class="w-14 h-14 <?php echo basename($_SERVER['PHP_SELF']) === 'profile.php' ? 'bg-white text-emerald-600' : 'text-slate-400'; ?> rounded-full flex items-center justify-center shadow-lg transition-transform active:scale-95 font-black text-xs">
-                <?php echo isset($_SESSION['user_id']) ? substr($_SESSION['name'], 0, 1) : '<i class="fas fa-user text-lg"></i>'; ?>
+            <a href="jobs.php" class="flex-1 flex flex-col items-center justify-center py-1.5 <?php echo basename($_SERVER['PHP_SELF']) === 'jobs.php' ? 'bg-white text-emerald-600 rounded-[1.5rem]' : 'text-slate-400 hover:text-white'; ?> transition-all active:scale-95">
+                <i class="fas fa-briefcase text-sm mb-0.5"></i>
+                <span class="text-[8px] font-bold uppercase tracking-widest">Jobs</span>
+            </a>
+            <a href="profile.php" class="flex-1 flex flex-col items-center justify-center py-1.5 <?php echo basename($_SERVER['PHP_SELF']) === 'profile.php' ? 'bg-white text-emerald-600 rounded-[1.5rem]' : 'text-slate-400 hover:text-white'; ?> transition-all active:scale-95">
+                <div class="w-4 h-4 rounded-full flex items-center justify-center mb-0.5 <?php echo basename($_SERVER['PHP_SELF']) === 'profile.php' ? 'text-emerald-600' : 'text-slate-400'; ?>">
+                    <?php echo isset($_SESSION['user_id']) ? '<span class="font-black text-[10px]">' . substr($_SESSION['name'], 0, 1) . '</span>' : '<i class="fas fa-user text-sm"></i>'; ?>
+                </div>
+                <span class="text-[8px] font-bold uppercase tracking-widest">Profile</span>
             </a>
         </div>
     </div>
